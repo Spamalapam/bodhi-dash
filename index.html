@@ -47,6 +47,11 @@
             touch-action: none; 
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
             overflow: visible;
+            transition: top 0.8s cubic-bezier(0.2, 0.8, 0.2, 1), 
+                        left 0.8s cubic-bezier(0.2, 0.8, 0.2, 1), 
+                        width 0.8s cubic-bezier(0.2, 0.8, 0.2, 1),
+                        height 0.8s cubic-bezier(0.2, 0.8, 0.2, 1),
+                        transform 0.8s ease;
         }
 
         /* MODE 1: Single */
@@ -176,12 +181,15 @@
             width: 100%; padding: 12px; background: #1a1a1a; border: 1px solid #333;
             color: white; border-radius: 8px; font-size: 1rem; outline: none; margin-bottom: 12px;
         }
+        
+        .btn-active { border: 1px solid #2563eb; color: #60a5fa; }
+        
+        #storage-status { font-size: 0.7rem; color: #aaa; margin-bottom: 10px; }
 
     </style>
 </head>
 <body class="rot-90" id="main-body">
 
-    <!-- Directory upload enabled -->
     <input type="file" id="fileInput" webkitdirectory directory multiple style="display:none">
     
     <video id="wake-video" loop playsinline muted style="display:none"><source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4"></video>
@@ -191,10 +199,9 @@
         
         <div id="settings-panel">
             <span class="setting-label">Source</span>
-            <button class="pro-btn" onclick="triggerUpload()" style="background:#2563eb; font-weight:bold;">+ Select Media Folder</button>
-            <div style="font-size:0.75rem; color:#888; margin-bottom:15px; line-height:1.4;">
-                Select your "pics" folder. Browsers require manual selection for security.
-            </div>
+            <button class="pro-btn" onclick="triggerUpload()" style="background:#2563eb; font-weight:bold;">+ Select Folder (Update)</button>
+            <div id="storage-status">Checking memory...</div>
+            <button class="pro-btn" onclick="clearMemory()" style="background:#333; font-size: 0.8rem;">Clear Memory</button>
 
             <span class="setting-label">Slide Interval</span>
             <select id="timer-select" class="pro-select" onchange="updateTimer(this.value)">
@@ -208,6 +215,7 @@
             <span class="setting-label">View</span>
             <button class="pro-btn" onclick="cycleScreenRotation()">Rotate Canvas (⟳)</button>
             <button id="btn-layout" class="pro-btn" onclick="toggleLayout()">Layout: Single</button>
+            <button id="btn-auto-arrange" class="pro-btn" onclick="toggleAutoArrange()">Auto-Arrange: OFF</button>
             <button id="btn-shuffle" class="pro-btn" onclick="toggleShuffle()">Shuffle: OFF</button>
             <button id="btn-motion" class="pro-btn" onclick="toggleMotion()">Motion: OFF</button>
             <button class="pro-btn" onclick="toggleFullScreen()">Full Screen</button>
@@ -239,7 +247,6 @@
                     <div id="time">00:00</div>
                 </div>
 
-                <!-- NEW: Schedule Glance -->
                 <div id="agenda-box" onclick="toggleCalendar()">
                     <div class="day-col">
                         <span class="day-label">Today</span>
@@ -259,7 +266,6 @@
             </div>
         </div>
         
-        <!-- Full Calendar Slider -->
         <div id="calendar-modal">
             <div class="cal-header">
                 Google Calendar
@@ -277,17 +283,93 @@
     let layoutMode = 1; 
     let shuffleActive = false;
     let motionActive = false;
+    let autoArrangeActive = false;
     let screenRotState = 1;
-    let userLat = 40.3769, userLon = -111.7958; // Pleasant Grove / AF area
+    let userLat = 40.3769, userLon = -111.7958; 
     let slideDuration = 3600000;
     let timers = [null, null, null];
+    let loadedRatios = { 1: 1, 2: 1, 3: 1 }; 
 
     let activeElement = null;
     let isResizing = false;
-    let isDragging = false; // Flag to distinguish drag from click
+    let isDragging = false; 
     let startX, startY, startW, startH, startTop, startLeft;
 
-    /* --- DRAG, RESIZE & CLICK LOGIC --- */
+    /* --- INDEXED DB (MEMORY) LOGIC --- */
+    const DB_NAME = 'FrameDB';
+    const STORE_NAME = 'mediaStore';
+
+    function initDB() {
+        return new Promise((resolve, reject) => {
+            const request = indexedDB.open(DB_NAME, 1);
+            request.onerror = e => reject('DB Error');
+            request.onupgradeneeded = e => {
+                const db = e.target.result;
+                if (!db.objectStoreNames.contains(STORE_NAME)) {
+                    db.createObjectStore(STORE_NAME, { autoIncrement: true });
+                }
+            };
+            request.onsuccess = e => resolve(e.target.result);
+        });
+    }
+
+    async function saveFilesToDB(files) {
+        const db = await initDB();
+        const tx = db.transaction(STORE_NAME, 'readwrite');
+        const store = tx.objectStore(STORE_NAME);
+        
+        // We do not clear old files, we append. User can clear manually.
+        let count = 0;
+        document.getElementById('storage-status').innerText = "Saving to memory...";
+        
+        for (let file of files) {
+            if(file.type.startsWith('image/') || file.type.startsWith('video/')) {
+                store.put(file);
+                count++;
+            }
+        }
+        
+        tx.oncomplete = () => {
+            document.getElementById('storage-status').innerText = count + " items saved to memory.";
+            loadFromDB(); // Reload to include new ones
+        };
+    }
+
+    async function loadFromDB() {
+        const db = await initDB();
+        const tx = db.transaction(STORE_NAME, 'readonly');
+        const store = tx.objectStore(STORE_NAME);
+        const request = store.getAll();
+
+        request.onsuccess = () => {
+            const files = request.result;
+            if (files && files.length > 0) {
+                mediaItems = files.map(f => ({
+                    url: URL.createObjectURL(f),
+                    type: f.type.startsWith('video/') ? 'video' : 'image'
+                }));
+                document.getElementById('storage-status').innerText = mediaItems.length + " items in memory.";
+                refreshAll();
+                document.getElementById('wake-video').play();
+            } else {
+                document.getElementById('storage-status').innerText = "Memory empty. Select folder.";
+            }
+        };
+    }
+
+    async function clearMemory() {
+        const db = await initDB();
+        const tx = db.transaction(STORE_NAME, 'readwrite');
+        tx.objectStore(STORE_NAME).clear();
+        tx.oncomplete = () => {
+            mediaItems = [];
+            document.getElementById('storage-status').innerText = "Memory cleared.";
+            refreshAll(); // Will empty screen
+        };
+    }
+
+    /* --- CORE LOGIC --- */
+
     function initDragAndResize() {
         document.addEventListener('pointerdown', e => {
             const pin = e.target.closest('.pin-handle');
@@ -298,11 +380,13 @@
                 startX = e.clientX; startY = e.clientY;
                 startTop = activeElement.offsetTop; startLeft = activeElement.offsetLeft;
                 activeElement.style.zIndex = 1000;
+                if(autoArrangeActive) toggleAutoArrange(); 
                 e.preventDefault();
             } else if (resizer && layoutMode === 3) {
                 activeElement = resizer.parentElement; isResizing = true; isDragging = true;
                 startX = e.clientX; startY = e.clientY;
                 startW = activeElement.offsetWidth; startH = activeElement.offsetHeight;
+                if(autoArrangeActive) toggleAutoArrange();
                 e.preventDefault();
             }
         });
@@ -312,7 +396,6 @@
             if (isResizing) {
                 const newWidth = Math.max(150, startW + (e.clientX - startX));
                 activeElement.style.width = newWidth + 'px';
-                // Calculate height based on aspect ratio if we could, but allowing free resize of polaroid frame
                 activeElement.style.height = (startH + (e.clientY - startY)) + 'px';
             } else {
                 activeElement.style.left = (startLeft + (e.clientX - startX)) + 'px';
@@ -323,21 +406,16 @@
         document.addEventListener('pointerup', () => { 
             if (activeElement) activeElement.style.zIndex = ''; 
             activeElement = null;
-            setTimeout(() => { isDragging = false; }, 100); // Small delay to prevent click firing after drag
+            setTimeout(() => { isDragging = false; }, 100); 
         });
     }
 
-    // Explicit function for changing images by clicking
     function handleImageClick(boxNum) {
-        if(isDragging) return; // Don't switch if we just finished dragging
+        if(isDragging) return; 
         if(mediaItems.length === 0) return;
-
-        // Force switch the image in this box
         const idxIndex = boxNum - 1;
         indices[idxIndex] = getNextIdx(indices[idxIndex], 1);
         renderBox(boxNum, indices[idxIndex]);
-        
-        // Visual feedback
         const box = document.getElementById('box-'+boxNum);
         box.style.filter = "brightness(1.5)";
         setTimeout(() => box.style.filter = "none", 200);
@@ -345,18 +423,10 @@
 
     function triggerUpload() { document.getElementById('fileInput').click(); toggleSettings(); }
 
+    // On file select, SAVE to DB
     document.getElementById('fileInput').addEventListener('change', function(e) {
         if(this.files.length) {
-            mediaItems = Array.from(this.files)
-                .filter(f => f.type.startsWith('image/') || f.type.startsWith('video/')) // Filter garbage
-                .map(f => ({
-                    url: URL.createObjectURL(f), 
-                    type: f.type.startsWith('video/') ? 'video' : 'image'
-                }));
-            
-            // Randomize start
-            refreshAll();
-            document.getElementById('wake-video').play();
+            saveFilesToDB(this.files);
         }
     });
 
@@ -374,6 +444,8 @@
         const b2 = document.getElementById('box-2'), b3 = document.getElementById('box-3');
         if(layoutMode >= 2) { b2.style.display = 'flex'; renderBox(2, indices[1]); } else { b2.style.display = 'none'; }
         if(layoutMode === 3) { b3.style.display = 'flex'; renderBox(3, indices[2]); } else { b3.style.display = 'none'; }
+        
+        if(layoutMode === 3 && autoArrangeActive) setTimeout(applySmartLayout, 100);
     }
 
     function renderBox(num, index) {
@@ -389,14 +461,17 @@
         
         const onLoaded = () => {
             el.classList.add('loaded');
-            // Auto-resize height for Corkboard mode (Polaroid style)
+            const nW = item.type === 'video' ? el.videoWidth : el.naturalWidth;
+            const nH = item.type === 'video' ? el.videoHeight : el.naturalHeight;
+            let ratio = nH / nW;
+            loadedRatios[num] = ratio; 
+
             if (layoutMode === 3) {
-                const nW = item.type === 'video' ? el.videoWidth : el.naturalWidth;
-                const nH = item.type === 'video' ? el.videoHeight : el.naturalHeight;
-                const ratio = nH / nW;
-                const w = parseInt(box.style.width) || box.offsetWidth;
-                if(w > 0 && ratio > 0) {
-                   box.style.height = (w * ratio + 40) + 'px'; // +40 for whitespace
+                if (!autoArrangeActive) {
+                    const w = parseInt(box.style.width) || box.offsetWidth;
+                    if(w > 0 && ratio > 0) box.style.height = (w * ratio + 40) + 'px'; 
+                } else {
+                    applySmartLayout();
                 }
             }
         };
@@ -406,6 +481,57 @@
         container.appendChild(el);
     }
 
+    function applySmartLayout() {
+        if(layoutMode !== 3 || !autoArrangeActive) return;
+        const CW = window.innerWidth;
+        const CH = window.innerHeight;
+        
+        const r1 = loadedRatios[1] || 1;
+        const r2 = loadedRatios[2] || 1;
+        const r3 = loadedRatios[3] || 1;
+        
+        const isP = (r) => r > 0.95; 
+        const pCount = (isP(r1)?1:0) + (isP(r2)?1:0) + (isP(r3)?1:0);
+
+        const setBox = (id, top, left, width) => {
+            const b = document.getElementById('box-'+id);
+            const r = loadedRatios[id];
+            b.style.top = top;
+            b.style.left = left;
+            b.style.width = width + 'px';
+            b.style.height = (width * r + 40) + 'px'; 
+            const rot = (Math.random() * 6 - 3).toFixed(1);
+            b.style.transform = `rotate(${rot}deg)`;
+        };
+
+        if (pCount === 3) {
+            const w = CW / 3.4; 
+            setBox(1, '15%', '3%', w); setBox(2, '15%', '35%', w); setBox(3, '15%', '68%', w);
+        } else if (pCount === 0) {
+             const w = CW / 2.5;
+             setBox(1, '5%', '5%', w); setBox(2, '5%', '55%', w); setBox(3, '50%', '30%', w);
+        } else if (pCount === 2) {
+            const wP = CW / 3.8; const wL = CW / 2.8;
+            setBox(1, '10%', '5%', wP); setBox(2, '10%', '70%', wP);
+            if (!isP(r1)) { setBox(1, '40%', '30%', wL); setBox(2, '10%', '5%', wP); setBox(3, '10%', '70%', wP); }
+            else if (!isP(r2)) { setBox(2, '40%', '30%', wL); setBox(1, '10%', '5%', wP); setBox(3, '10%', '70%', wP); }
+            else { setBox(3, '40%', '30%', wL); setBox(1, '10%', '5%', wP); setBox(2, '10%', '70%', wP); }
+        } else {
+            const wP = CW / 3.2; const wL = CW / 2.5;
+            let pId = isP(r1) ? 1 : (isP(r2) ? 2 : 3);
+            let lIds = [1,2,3].filter(x => x !== pId);
+            setBox(pId, '10%', '5%', wP); setBox(lIds[0], '5%', '45%', wL); setBox(lIds[1], '55%', '50%', wL);
+        }
+    }
+
+    function toggleAutoArrange() {
+        autoArrangeActive = !autoArrangeActive;
+        const btn = document.getElementById('btn-auto-arrange');
+        btn.innerText = "Auto-Arrange: " + (autoArrangeActive ? "ON" : "OFF");
+        if(autoArrangeActive) { btn.classList.add('btn-active'); applySmartLayout(); } else { btn.classList.remove('btn-active'); }
+    }
+
+    /* --- STANDARD FUNCTIONS --- */
     function updateTimer(val) {
         timers.forEach(t => clearInterval(t));
         if(val === 'static') return;
@@ -422,52 +548,22 @@
 
     function toggleSettings() { document.getElementById('settings-panel').classList.toggle('open'); }
     function toggleCalendar() { document.getElementById('calendar-modal').classList.toggle('show'); }
-    
-    function toggleLayout() {
-        layoutMode = (layoutMode % 3) + 1;
-        document.getElementById('btn-layout').innerText = "Layout: " + ["Single", "Staggered", "Corkboard"][layoutMode-1];
-        refreshAll();
-    }
+    function toggleLayout() { layoutMode = (layoutMode % 3) + 1; document.getElementById('btn-layout').innerText = "Layout: " + ["Single", "Staggered", "Corkboard"][layoutMode-1]; refreshAll(); }
     function toggleShuffle() { shuffleActive = !shuffleActive; document.getElementById('btn-shuffle').innerText = "Shuffle: " + (shuffleActive?"ON":"OFF"); }
     function toggleMotion() { motionActive = !motionActive; document.getElementById('btn-motion').innerText = "Motion: " + (motionActive?"ON":"OFF"); refreshAll(); }
-    function cycleScreenRotation() { screenRotState = (screenRotState + 1) % 4; document.getElementById('main-body').className = 'rot-' + (screenRotState * 90); }
+    function cycleScreenRotation() { screenRotState = (screenRotState + 1) % 4; document.getElementById('main-body').className = 'rot-' + (screenRotState * 90); setTimeout(applySmartLayout, 600); }
     function toggleFullScreen() { if (!document.fullscreenElement) document.documentElement.requestFullscreen(); else document.exitFullscreen(); toggleSettings(); }
-    function resetCorkboard() {
-        const b = [{t:'10%',l:'10%',w:'280px'},{t:'15%',l:'50%',w:'280px'},{t:'50%',l:'30%',w:'280px'}];
-        b.forEach((s,i) => { let e=document.getElementById('box-'+(i+1)); e.style.top=s.t; e.style.left=s.l; e.style.width=s.w; });
-        refreshAll();
-    }
-
-    function updateTimeAndDate() {
-        const n = new Date();
-        const tmrw = new Date(n); tmrw.setDate(n.getDate() + 1);
-        
-        document.getElementById('time').innerText = n.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
-        
-        // Update Agenda Glance
-        document.getElementById('date-today').innerText = n.toLocaleDateString([], {weekday:'short', day:'numeric'});
-        document.getElementById('date-tmrw').innerText = tmrw.toLocaleDateString([], {weekday:'short', day:'numeric'});
-
-        // Dim at night
-        const h = n.getHours();
-        document.body.style.filter = (h >= 22 || h < 7) ? "brightness(0.6)" : "none";
-    }
-
-    async function updateWeather() {
-        try {
-            const r = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${userLat}&longitude=${userLon}&current_weather=true&temperature_unit=fahrenheit`);
-            const d = await r.json(); 
-            document.getElementById('temp').innerText = Math.round(d.current_weather.temperature) + "°";
-            const c = d.current_weather.weathercode;
-            let s = "Clear"; if(c > 2) s = "Cloudy"; if(c > 50) s = "Rain"; if(c > 70) s = "Snow";
-            document.getElementById('condition').innerText = s;
-        } catch(e) {}
-    }
+    function resetCorkboard() { const b = [{t:'10%',l:'10%',w:'280px'},{t:'15%',l:'50%',w:'280px'},{t:'50%',l:'30%',w:'280px'}]; b.forEach((s,i) => { let e=document.getElementById('box-'+(i+1)); e.style.top=s.t; e.style.left=s.l; e.style.width=s.w; }); refreshAll(); }
+    function updateTimeAndDate() { const n = new Date(); const tmrw = new Date(n); tmrw.setDate(n.getDate() + 1); document.getElementById('time').innerText = n.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}); document.getElementById('date-today').innerText = n.toLocaleDateString([], {weekday:'short', day:'numeric'}); document.getElementById('date-tmrw').innerText = tmrw.toLocaleDateString([], {weekday:'short', day:'numeric'}); const h = n.getHours(); document.body.style.filter = (h >= 22 || h < 7) ? "brightness(0.6)" : "none"; }
+    async function updateWeather() { try { const r = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${userLat}&longitude=${userLon}&current_weather=true&temperature_unit=fahrenheit`); const d = await r.json(); document.getElementById('temp').innerText = Math.round(d.current_weather.temperature) + "°"; const c = d.current_weather.weathercode; let s = "Clear"; if(c > 2) s = "Cloudy"; if(c > 50) s = "Rain"; if(c > 70) s = "Snow"; document.getElementById('condition').innerText = s; } catch(e) {} }
 
     initDragAndResize();
+    loadFromDB(); // AUTO-LOAD ON START
     setInterval(updateTimeAndDate, 1000); updateTimeAndDate();
     updateWeather(); setInterval(updateWeather, 900000); 
     updateTimer(3600000);
 </script>
 </body>
 </html>
+
+
