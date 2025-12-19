@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adam's Command Center</title>
+    <style>
+        :root {
+            --bg-blur: blur(12px);
+            --card-bg: rgba(255, 255, 255, 0.1);
+        }
+        body, html {
+            margin: 0; padding: 0;
+            width: 100%; height: 100%;
+            font-family: 'Segoe UI', sans-serif;
+            background: #000; overflow: hidden;
+            color: white;
+        }
+        #photo-bg {
+            position: fixed; width: 100%; height: 100%;
+            object-fit: cover; z-index: -1;
+            transition: opacity 2s ease-in-out;
+        }
+        .dashboard {
+            display: grid;
+            grid-template-columns: 350px 1fr 350px;
+            gap: 20px; padding: 30px;
+            height: 90vh;
+        }
+        .card {
+            background: var(--card-bg);
+            backdrop-filter: var(--bg-blur);
+            border-radius: 20px; padding: 20px;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        .health-tasks input { margin-right: 10px; transform: scale(1.5); }
+        #clock { font-size: 3rem; font-weight: bold; margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+    <img id="photo-bg" src="https://images.unsplash.com/photo-1506744038136-46273834b3fb" alt="Background">
+
+    <div class="dashboard">
+        <div class="card">
+            <h2>Today's Rituals</h2>
+            <div class="health-tasks">
+                <p><input type="checkbox"> Meditation (10m)</p>
+                <p><input type="checkbox"> Hydration Goal</p>
+                <p><input type="checkbox"> Eye Rest (Optician Rule!)</p>
+                <p><input type="checkbox"> Walk with Marco 🐕</p>
+            </div>
+            <hr>
+            <h3>Notes</h3>
+            <div id="remote-notes">Check in with Kris later.</div>
+        </div>
+
+        <div style="text-align: center; align-self: center;">
+            <div id="clock">00:00</div>
+            <div id="mindfulness-quote">"Peace is every step."</div>
+        </div>
+
+        <div class="card">
+            <h2>Schedule</h2>
+            <iframe src="YOUR_GOOGLE_CALENDAR_EMBED_URL" style="border:0; width:100%; height:80%;" frameborder="0" scrolling="no"></iframe>
+        </div>
+    </div>
+
+    <script>
+        // Photo Shuffler
+        const photos = [
+            "https://source.unsplash.com/random/1920x1080?nature",
+            "https://source.unsplash.com/random/1920x1080?mountain"
+        ];
+        let currentIdx = 0;
+        setInterval(() => {
+            currentIdx = (currentIdx + 1) % photos.length;
+            document.getElementById('photo-bg').src = photos[currentIdx];
+        }, 30000); // Change every 30s
+
+        // Clock logic
+        function updateTime() {
+            const now = new Date();
+            document.getElementById('clock').innerText = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        }
+        setInterval(updateTime, 1000);
+    </script>
+</body>
+</html>
