@@ -2,87 +2,472 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Adam's Command Center</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#000000">
+    <title>Adam's Multimedia Frame</title>
     <style>
-        :root {
-            --bg-blur: blur(12px);
-            --card-bg: rgba(255, 255, 255, 0.1);
-        }
-        body, html {
-            margin: 0; padding: 0;
-            width: 100%; height: 100%;
-            font-family: 'Segoe UI', sans-serif;
-            background: #000; overflow: hidden;
+        /* --- CORE STYLES --- */
+        body {
+            background-color: #000;
+            margin: 0;
+            overflow: hidden;
+            font-family: 'Segoe UI', Roboto, sans-serif;
             color: white;
+            transition: filter 1s ease;
+            position: absolute; top: 0; left: 0;
+            user-select: none; 
+            -webkit-user-select: none;
+            overscroll-behavior: none;
         }
-        #photo-bg {
-            position: fixed; width: 100%; height: 100%;
-            object-fit: cover; z-index: -1;
-            transition: opacity 2s ease-in-out;
+
+        /* --- ROTATION --- */
+        body.rot-0   { width: 100vw; height: 100vh; transform: none; }
+        body.rot-90  { width: 100vh; height: 100vw; transform: rotate(90deg); transform-origin: bottom left; top: -100vw; left: 0; }
+        body.rot-180 { width: 100vw; height: 100vh; transform: rotate(180deg); transform-origin: center center; }
+        body.rot-270 { width: 100vh; height: 100vw; transform: rotate(-90deg); transform-origin: top right; top: 0; left: -100vh; }
+
+        #container {
+            position: relative; width: 100%; height: 100%;
+            overflow: hidden; background: #000; 
         }
-        .dashboard {
-            display: grid;
-            grid-template-columns: 350px 1fr 350px;
-            gap: 20px; padding: 30px;
-            height: 90vh;
+
+        /* --- MEDIA WRAPPER --- */
+        #photo-wrapper {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 1;
+            transition: background 0.5s ease;
         }
-        .card {
-            background: var(--card-bg);
-            backdrop-filter: var(--bg-blur);
-            border-radius: 20px; padding: 20px;
-            border: 1px solid rgba(255,255,255,0.2);
+
+        .img-box {
+            position: absolute; 
+            display: flex; flex-direction: column;
+            justify-content: flex-start; align-items: center;
+            background: #050505; 
+            touch-action: none; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            overflow: visible;
         }
-        .health-tasks input { margin-right: 10px; transform: scale(1.5); }
-        #clock { font-size: 3rem; font-weight: bold; margin-bottom: 10px; }
+
+        /* MODE 1: Single */
+        .mode-1 .img-box { width: 100% !important; height: 100% !important; top: 0 !important; left: 0 !important; transform: none !important; border: none !important; padding: 0 !important; background: #000; }
+        
+        /* MODE 2: Staggered */
+        .mode-2 .img-box { width: 80%; height: 70%; background: #111; border: 4px solid #222; }
+        .mode-2 #box-1 { top: 15%; left: 10%; z-index: 2; transform: rotate(-2deg); }
+        .mode-2 #box-2 { top: 20%; left: 15%; z-index: 1; transform: rotate(3deg); opacity: 0.8; }
+
+        /* MODE 3: Corkboard */
+        .mode-3 {
+            background-image: radial-gradient(#d2b48c 1px, transparent 1px), radial-gradient(#d2b48c 1px, #c19a6b 1px);
+            background-size: 20px 20px;
+            background-position: 0 0, 10px 10px;
+        }
+        .mode-3 .img-box {
+            background: #fff;
+            padding: 8px 8px 40px 8px; /* Extra bottom padding for "Polaroid" look */
+            border: none;
+            box-shadow: 2px 8px 15px rgba(0,0,0,0.4);
+        }
+        
+        /* HANDLES */
+        .pin-handle {
+            position: absolute; top: -8px; left: 50%; width: 24px; height: 24px;
+            background: radial-gradient(circle at 30% 30%, #ff4d4d, #cc0000);
+            border-radius: 50%; transform: translateX(-50%);
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.5); z-index: 50; cursor: move; display: none;
+        }
+        .mode-3 .pin-handle { display: block; }
+
+        .resize-handle {
+            position: absolute; bottom: 0; left: 0; width: 100%; height: 40px;
+            cursor: ns-resize; display: none; z-index: 40;
+        }
+        .mode-3 .resize-handle { display: block; }
+
+        .media-container { 
+            width: 100%; height: 100%; 
+            overflow: hidden; position: relative; 
+            pointer-events: auto; /* Allow clicks */
+            cursor: pointer;
+        }
+        
+        .mode-1 .media-container { cursor: default; }
+
+        .media-item {
+            width: 100%; height: 100%; object-fit: contain;
+            opacity: 0; transition: opacity 0.5s; pointer-events: none;
+        }
+        .media-item.loaded { opacity: 1; }
+        .mode-3 .media-item { object-fit: cover; }
+
+        /* Ken Burns */
+        .ken-burns { animation: kenBurnsEffect 20s infinite alternate ease-in-out; }
+        @keyframes kenBurnsEffect {
+            0% { transform: scale(1.0); } 
+            100% { transform: scale(1.15); }
+        }
+
+        /* --- OVERLAY --- */
+        #overlay {
+            position: absolute; bottom: 0; left: 0; width: 100%; z-index: 100;
+            padding: 20px 30px 30px 30px; box-sizing: border-box; pointer-events: none; 
+            background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.5) 50%, transparent 100%);
+            display: flex; flex-direction: column; justify-content: flex-end;
+        }
+        .info-row { display: flex; justify-content: space-between; align-items: flex-end; width: 100%; }
+        
+        #time-widget { text-align: left; pointer-events: auto; cursor: pointer; }
+        #time { font-size: 3.5rem; font-weight: 200; line-height: 0.9; text-shadow: 0 2px 10px rgba(0,0,0,0.5); }
+        
+        /* Agenda / Calendar Glance */
+        #agenda-box {
+            text-align: center; pointer-events: auto; cursor: pointer;
+            background: rgba(255,255,255,0.1); padding: 8px 16px; border-radius: 12px;
+            backdrop-filter: blur(5px); transition: background 0.2s;
+            display: flex; gap: 20px;
+        }
+        #agenda-box:active { background: rgba(255,255,255,0.2); }
+
+        .day-col { display: flex; flex-direction: column; align-items: center; }
+        .day-label { font-size: 0.65rem; text-transform: uppercase; color: #aaa; letter-spacing: 1px; }
+        .day-date { font-size: 1.1rem; font-weight: 600; color: #fff; }
+
+        #weather-box { text-align: right; pointer-events: none; }
+        #temp { font-size: 2.5rem; font-weight: 600; text-shadow: 0 2px 10px rgba(0,0,0,0.5); }
+        #condition { font-size: 0.9rem; color: #ccc; text-transform: uppercase; letter-spacing: 1px; }
+
+        /* --- FULL CALENDAR IFRAME --- */
+        #calendar-modal {
+            position: absolute; bottom: -100%; left: 0; width: 100%; height: 80%;
+            background: white; transition: bottom 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 160; border-top-left-radius: 20px; border-top-right-radius: 20px;
+            overflow: hidden; box-shadow: 0 -10px 40px rgba(0,0,0,0.5);
+        }
+        #calendar-modal.show { bottom: 0; }
+        .cal-header {
+            height: 40px; background: #f5f5f5; display: flex; justify-content: center; align-items: center;
+            border-bottom: 1px solid #ddd; color: #333; font-weight: bold; font-size: 14px;
+        }
+        .close-cal { position: absolute; right: 15px; top: 10px; cursor: pointer; font-size: 20px; color: #666; }
+
+        /* --- SETTINGS --- */
+        #settings-btn {
+            position: absolute; top: 30px; right: 30px; z-index: 150;
+            width: 40px; height: 40px; background: rgba(0,0,0,0.4);
+            border: 1px solid rgba(255,255,255,0.1); border-radius: 50%;
+            color: #ddd; display: flex; align-items: center; justify-content: center;
+            font-size: 20px; cursor: pointer; pointer-events: auto; backdrop-filter: blur(4px);
+        }
+        #settings-panel {
+            position: absolute; top: 0; right: -320px; width: 300px; height: 100%;
+            background: rgba(10,10,10,0.95); backdrop-filter: blur(20px);
+            z-index: 200; transition: right 0.3s ease;
+            padding: 80px 20px 20px 20px; box-sizing: border-box; border-left: 1px solid #333;
+            overflow-y: auto;
+        }
+        #settings-panel.open { right: 0; }
+        .setting-label { font-size: 0.75rem; color: #666; margin-bottom: 8px; display: block; text-transform: uppercase; letter-spacing: 1.5px; }
+        .pro-btn {
+            display: block; width: 100%; padding: 12px; margin-bottom: 8px;
+            background: #1a1a1a; border: 1px solid #333; color: #eee; border-radius: 8px; text-align: left; cursor: pointer;
+        }
+        .pro-select {
+            width: 100%; padding: 12px; background: #1a1a1a; border: 1px solid #333;
+            color: white; border-radius: 8px; font-size: 1rem; outline: none; margin-bottom: 12px;
+        }
+
     </style>
 </head>
-<body>
-    <img id="photo-bg" src="https://images.unsplash.com/photo-1506744038136-46273834b3fb" alt="Background">
+<body class="rot-90" id="main-body">
 
-    <div class="dashboard">
-        <div class="card">
-            <h2>Today's Rituals</h2>
-            <div class="health-tasks">
-                <p><input type="checkbox"> Meditation (10m)</p>
-                <p><input type="checkbox"> Hydration Goal</p>
-                <p><input type="checkbox"> Eye Rest (Optician Rule!)</p>
-                <p><input type="checkbox"> Walk with Marco 🐕</p>
+    <!-- Directory upload enabled -->
+    <input type="file" id="fileInput" webkitdirectory directory multiple style="display:none">
+    
+    <video id="wake-video" loop playsinline muted style="display:none"><source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4"></video>
+
+    <div id="container">
+        <div id="settings-btn" onclick="toggleSettings()">⚙</div>
+        
+        <div id="settings-panel">
+            <span class="setting-label">Source</span>
+            <button class="pro-btn" onclick="triggerUpload()" style="background:#2563eb; font-weight:bold;">+ Select Media Folder</button>
+            <div style="font-size:0.75rem; color:#888; margin-bottom:15px; line-height:1.4;">
+                Select your "pics" folder. Browsers require manual selection for security.
             </div>
-            <hr>
-            <h3>Notes</h3>
-            <div id="remote-notes">Check in with Kris later.</div>
+
+            <span class="setting-label">Slide Interval</span>
+            <select id="timer-select" class="pro-select" onchange="updateTimer(this.value)">
+                <option value="15000">15 Seconds</option>
+                <option value="60000">1 Minute</option>
+                <option value="300000">5 Minutes</option>
+                <option value="3600000" selected>1 Hour</option>
+                <option value="static">Static</option>
+            </select>
+
+            <span class="setting-label">View</span>
+            <button class="pro-btn" onclick="cycleScreenRotation()">Rotate Canvas (⟳)</button>
+            <button id="btn-layout" class="pro-btn" onclick="toggleLayout()">Layout: Single</button>
+            <button id="btn-shuffle" class="pro-btn" onclick="toggleShuffle()">Shuffle: OFF</button>
+            <button id="btn-motion" class="pro-btn" onclick="toggleMotion()">Motion: OFF</button>
+            <button class="pro-btn" onclick="toggleFullScreen()">Full Screen</button>
+            
+            <button class="pro-btn" onclick="resetCorkboard()" id="reset-btn" style="display:none; background: #444;">Reset Pins</button>
+        </div>
+        
+        <div id="photo-wrapper" class="mode-1">
+            <div id="box-1" class="img-box" style="top:10%; left:10%; width:280px;">
+                <div class="pin-handle"></div>
+                <div class="media-container" onclick="handleImageClick(1)"></div>
+                <div class="resize-handle"></div>
+            </div>
+            <div id="box-2" class="img-box" style="top:15%; left:50%; width:280px; display:none;">
+                <div class="pin-handle"></div>
+                <div class="media-container" onclick="handleImageClick(2)"></div>
+                <div class="resize-handle"></div>
+            </div>
+            <div id="box-3" class="img-box" style="top:50%; left:30%; width:280px; display:none;">
+                <div class="pin-handle"></div>
+                <div class="media-container" onclick="handleImageClick(3)"></div>
+                <div class="resize-handle"></div>
+            </div>
         </div>
 
-        <div style="text-align: center; align-self: center;">
-            <div id="clock">00:00</div>
-            <div id="mindfulness-quote">"Peace is every step."</div>
-        </div>
+        <div id="overlay">
+            <div class="info-row">
+                <div id="time-widget" onclick="toggleSettings()">
+                    <div id="time">00:00</div>
+                </div>
 
-        <div class="card">
-            <h2>Schedule</h2>
-            <iframe src="YOUR_GOOGLE_CALENDAR_EMBED_URL" style="border:0; width:100%; height:80%;" frameborder="0" scrolling="no"></iframe>
+                <!-- NEW: Schedule Glance -->
+                <div id="agenda-box" onclick="toggleCalendar()">
+                    <div class="day-col">
+                        <span class="day-label">Today</span>
+                        <span class="day-date" id="date-today">--</span>
+                    </div>
+                    <div style="width:1px; background:rgba(255,255,255,0.3);"></div>
+                    <div class="day-col">
+                        <span class="day-label">Tomrw</span>
+                        <span class="day-date" id="date-tmrw">--</span>
+                    </div>
+                </div>
+
+                <div id="weather-box">
+                    <div id="temp">--°</div>
+                    <div id="condition">...</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Full Calendar Slider -->
+        <div id="calendar-modal">
+            <div class="cal-header">
+                Google Calendar
+                <div class="close-cal" onclick="toggleCalendar()">✕</div>
+            </div>
+            <iframe src="https://calendar.google.com/calendar/embed?src=runner4evs%40gmail.com&ctz=America%2FDenver&mode=AGENDA&showTitle=0&showNav=1&showDate=1&showPrint=0&showTabs=0&showCalendars=0&bgcolor=%23ffffff" 
+                style="border:0; width:100%; height:100%;" frameborder="0" scrolling="no">
+            </iframe>
         </div>
     </div>
 
-    <script>
-        // Photo Shuffler
-        const photos = [
-            "https://source.unsplash.com/random/1920x1080?nature",
-            "https://source.unsplash.com/random/1920x1080?mountain"
-        ];
-        let currentIdx = 0;
-        setInterval(() => {
-            currentIdx = (currentIdx + 1) % photos.length;
-            document.getElementById('photo-bg').src = photos[currentIdx];
-        }, 30000); // Change every 30s
+<script>
+    let mediaItems = [];
+    let indices = [0, 1, 2];
+    let layoutMode = 1; 
+    let shuffleActive = false;
+    let motionActive = false;
+    let screenRotState = 1;
+    let userLat = 40.3769, userLon = -111.7958; // Pleasant Grove / AF area
+    let slideDuration = 3600000;
+    let timers = [null, null, null];
 
-        // Clock logic
-        function updateTime() {
-            const now = new Date();
-            document.getElementById('clock').innerText = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+    let activeElement = null;
+    let isResizing = false;
+    let isDragging = false; // Flag to distinguish drag from click
+    let startX, startY, startW, startH, startTop, startLeft;
+
+    /* --- DRAG, RESIZE & CLICK LOGIC --- */
+    function initDragAndResize() {
+        document.addEventListener('pointerdown', e => {
+            const pin = e.target.closest('.pin-handle');
+            const resizer = e.target.closest('.resize-handle');
+            
+            if (pin && layoutMode === 3) {
+                activeElement = pin.parentElement; isResizing = false; isDragging = true;
+                startX = e.clientX; startY = e.clientY;
+                startTop = activeElement.offsetTop; startLeft = activeElement.offsetLeft;
+                activeElement.style.zIndex = 1000;
+                e.preventDefault();
+            } else if (resizer && layoutMode === 3) {
+                activeElement = resizer.parentElement; isResizing = true; isDragging = true;
+                startX = e.clientX; startY = e.clientY;
+                startW = activeElement.offsetWidth; startH = activeElement.offsetHeight;
+                e.preventDefault();
+            }
+        });
+
+        document.addEventListener('pointermove', e => {
+            if (!activeElement) return;
+            if (isResizing) {
+                const newWidth = Math.max(150, startW + (e.clientX - startX));
+                activeElement.style.width = newWidth + 'px';
+                // Calculate height based on aspect ratio if we could, but allowing free resize of polaroid frame
+                activeElement.style.height = (startH + (e.clientY - startY)) + 'px';
+            } else {
+                activeElement.style.left = (startLeft + (e.clientX - startX)) + 'px';
+                activeElement.style.top = (startTop + (e.clientY - startY)) + 'px';
+            }
+        });
+
+        document.addEventListener('pointerup', () => { 
+            if (activeElement) activeElement.style.zIndex = ''; 
+            activeElement = null;
+            setTimeout(() => { isDragging = false; }, 100); // Small delay to prevent click firing after drag
+        });
+    }
+
+    // Explicit function for changing images by clicking
+    function handleImageClick(boxNum) {
+        if(isDragging) return; // Don't switch if we just finished dragging
+        if(mediaItems.length === 0) return;
+
+        // Force switch the image in this box
+        const idxIndex = boxNum - 1;
+        indices[idxIndex] = getNextIdx(indices[idxIndex], 1);
+        renderBox(boxNum, indices[idxIndex]);
+        
+        // Visual feedback
+        const box = document.getElementById('box-'+boxNum);
+        box.style.filter = "brightness(1.5)";
+        setTimeout(() => box.style.filter = "none", 200);
+    }
+
+    function triggerUpload() { document.getElementById('fileInput').click(); toggleSettings(); }
+
+    document.getElementById('fileInput').addEventListener('change', function(e) {
+        if(this.files.length) {
+            mediaItems = Array.from(this.files)
+                .filter(f => f.type.startsWith('image/') || f.type.startsWith('video/')) // Filter garbage
+                .map(f => ({
+                    url: URL.createObjectURL(f), 
+                    type: f.type.startsWith('video/') ? 'video' : 'image'
+                }));
+            
+            // Randomize start
+            refreshAll();
+            document.getElementById('wake-video').play();
         }
-        setInterval(updateTime, 1000);
-    </script>
+    });
+
+    function getNextIdx(curr, dir) {
+        if(shuffleActive) return Math.floor(Math.random() * mediaItems.length);
+        return (curr + dir + mediaItems.length) % mediaItems.length;
+    }
+
+    function refreshAll() {
+        const wrap = document.getElementById('photo-wrapper');
+        wrap.className = 'mode-' + layoutMode;
+        document.getElementById('reset-btn').style.display = (layoutMode === 3) ? 'block' : 'none';
+        
+        renderBox(1, indices[0]);
+        const b2 = document.getElementById('box-2'), b3 = document.getElementById('box-3');
+        if(layoutMode >= 2) { b2.style.display = 'flex'; renderBox(2, indices[1]); } else { b2.style.display = 'none'; }
+        if(layoutMode === 3) { b3.style.display = 'flex'; renderBox(3, indices[2]); } else { b3.style.display = 'none'; }
+    }
+
+    function renderBox(num, index) {
+        const box = document.getElementById('box-' + num);
+        const container = box.querySelector('.media-container');
+        container.innerHTML = '';
+        if(!mediaItems[index]) return;
+        
+        let item = mediaItems[index];
+        let el = document.createElement(item.type === 'video' ? 'video' : 'img');
+        el.className = 'media-item';
+        if(motionActive && item.type === 'image') el.classList.add('ken-burns');
+        
+        const onLoaded = () => {
+            el.classList.add('loaded');
+            // Auto-resize height for Corkboard mode (Polaroid style)
+            if (layoutMode === 3) {
+                const nW = item.type === 'video' ? el.videoWidth : el.naturalWidth;
+                const nH = item.type === 'video' ? el.videoHeight : el.naturalHeight;
+                const ratio = nH / nW;
+                const w = parseInt(box.style.width) || box.offsetWidth;
+                if(w > 0 && ratio > 0) {
+                   box.style.height = (w * ratio + 40) + 'px'; // +40 for whitespace
+                }
+            }
+        };
+        if(item.type === 'video') { el.loop = el.muted = el.autoplay = el.playsInline = true; el.oncanplay = onLoaded; }
+        else { el.onload = onLoaded; }
+        el.src = item.url;
+        container.appendChild(el);
+    }
+
+    function updateTimer(val) {
+        timers.forEach(t => clearInterval(t));
+        if(val === 'static') return;
+        slideDuration = parseInt(val);
+        const tick = (n, i) => {
+            if(!mediaItems.length) return;
+            indices[i] = getNextIdx(indices[i], 1);
+            renderBox(n, indices[i]);
+        };
+        timers[0] = setInterval(() => tick(1, 0), slideDuration);
+        setTimeout(() => timers[1] = setInterval(() => { if(layoutMode >= 2) tick(2, 1) }, slideDuration), slideDuration/3);
+        setTimeout(() => timers[2] = setInterval(() => { if(layoutMode === 3) tick(3, 2) }, slideDuration), (slideDuration/3)*2);
+    }
+
+    function toggleSettings() { document.getElementById('settings-panel').classList.toggle('open'); }
+    function toggleCalendar() { document.getElementById('calendar-modal').classList.toggle('show'); }
+    
+    function toggleLayout() {
+        layoutMode = (layoutMode % 3) + 1;
+        document.getElementById('btn-layout').innerText = "Layout: " + ["Single", "Staggered", "Corkboard"][layoutMode-1];
+        refreshAll();
+    }
+    function toggleShuffle() { shuffleActive = !shuffleActive; document.getElementById('btn-shuffle').innerText = "Shuffle: " + (shuffleActive?"ON":"OFF"); }
+    function toggleMotion() { motionActive = !motionActive; document.getElementById('btn-motion').innerText = "Motion: " + (motionActive?"ON":"OFF"); refreshAll(); }
+    function cycleScreenRotation() { screenRotState = (screenRotState + 1) % 4; document.getElementById('main-body').className = 'rot-' + (screenRotState * 90); }
+    function toggleFullScreen() { if (!document.fullscreenElement) document.documentElement.requestFullscreen(); else document.exitFullscreen(); toggleSettings(); }
+    function resetCorkboard() {
+        const b = [{t:'10%',l:'10%',w:'280px'},{t:'15%',l:'50%',w:'280px'},{t:'50%',l:'30%',w:'280px'}];
+        b.forEach((s,i) => { let e=document.getElementById('box-'+(i+1)); e.style.top=s.t; e.style.left=s.l; e.style.width=s.w; });
+        refreshAll();
+    }
+
+    function updateTimeAndDate() {
+        const n = new Date();
+        const tmrw = new Date(n); tmrw.setDate(n.getDate() + 1);
+        
+        document.getElementById('time').innerText = n.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+        
+        // Update Agenda Glance
+        document.getElementById('date-today').innerText = n.toLocaleDateString([], {weekday:'short', day:'numeric'});
+        document.getElementById('date-tmrw').innerText = tmrw.toLocaleDateString([], {weekday:'short', day:'numeric'});
+
+        // Dim at night
+        const h = n.getHours();
+        document.body.style.filter = (h >= 22 || h < 7) ? "brightness(0.6)" : "none";
+    }
+
+    async function updateWeather() {
+        try {
+            const r = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${userLat}&longitude=${userLon}&current_weather=true&temperature_unit=fahrenheit`);
+            const d = await r.json(); 
+            document.getElementById('temp').innerText = Math.round(d.current_weather.temperature) + "°";
+            const c = d.current_weather.weathercode;
+            let s = "Clear"; if(c > 2) s = "Cloudy"; if(c > 50) s = "Rain"; if(c > 70) s = "Snow";
+            document.getElementById('condition').innerText = s;
+        } catch(e) {}
+    }
+
+    initDragAndResize();
+    setInterval(updateTimeAndDate, 1000); updateTimeAndDate();
+    updateWeather(); setInterval(updateWeather, 900000); 
+    updateTimer(3600000);
+</script>
 </body>
 </html>
