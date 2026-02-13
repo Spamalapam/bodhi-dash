@@ -4,51 +4,60 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="theme-color" content="#000000" />
   <title>Adam's Multimedia Frame</title>
-  
-  <!-- FONTS & ICONS -->
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Permanent+Marker&family=Kalam:wght@300;400;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Permanent+Marker&family=Kalam:wght@300;400;700&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@48,400,1,0" />
 
   <style>
-    /* --- VARIABLES --- */
     :root {
-      --accent-color: #3b82f6;
-      --sticky-yellow: #fef9c3;
-      --sticky-pink: #fce7f3;
-      --sticky-blue: #dbeafe;
+      --accent: #6366f1;
+      --accent-glow: rgba(99, 102, 241, 0.25);
+      --sticky-cream: #fefce8;
+      --sticky-rose: #fce7f3;
+      --sticky-sky: #e0f2fe;
+      --sticky-mint: #ecfdf5;
+      --panel-bg: #0a0a0f;
+      --panel-card: #16161f;
+      --panel-border: #1e1e2e;
+      --panel-text: #e4e4e7;
+      --panel-muted: #71717a;
+      --transition-photos: 0.9s;
     }
 
-    /* --- CORE --- */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
     body {
-      background-color: #000;
-      margin: 0;
+      background: #000;
       overflow: hidden;
-      font-family: 'Inter', sans-serif;
+      font-family: 'DM Sans', sans-serif;
       color: #1f2937;
-      transition: filter 1s ease;
       user-select: none;
       -webkit-user-select: none;
       overscroll-behavior: none;
+      transition: filter 0.8s ease;
     }
 
     #container {
       position: relative;
-      width: 100vw;
-      height: 100vh;
+      width: 100vw; height: 100vh;
       overflow: hidden;
       background: #000;
       transform-origin: center center;
-      will-change: transform;
     }
 
-    /* --- MEDIA LAYER --- */
+    /* ============================
+       PHOTO LAYER
+    ============================ */
     #photo-wrapper {
-      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      position: absolute; top: 0; left: 0;
+      width: 100%; height: 100%;
       z-index: 1;
+      transition: background-color 0.6s;
     }
 
     .img-box {
@@ -57,188 +66,576 @@
       justify-content: flex-start; align-items: center;
       touch-action: none;
       overflow: visible;
-      transition: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+      transition: left 0.7s cubic-bezier(0.34, 1.56, 0.64, 1),
+                  top 0.7s cubic-bezier(0.34, 1.56, 0.64, 1),
+                  width 0.7s cubic-bezier(0.34, 1.56, 0.64, 1),
+                  height 0.7s cubic-bezier(0.34, 1.56, 0.64, 1),
+                  transform 0.7s cubic-bezier(0.34, 1.56, 0.64, 1),
+                  opacity 0.5s;
     }
+    .img-box.dragging { transition: none !important; }
 
-    /* MODE 1: Single */
-    .mode-1 .img-box { width: 100% !important; height: 100% !important; top: 0 !important; left: 0 !important; transform: none !important; border: none !important; padding: 0 !important; background: #000; }
+    /* --- MODE 1: Single fullscreen --- */
+    .mode-1 .img-box {
+      width: 100% !important; height: 100% !important;
+      top: 0 !important; left: 0 !important;
+      transform: none !important;
+      border: none !important; padding: 0 !important;
+      background: #000;
+    }
+    .mode-1 .pin-handle,
+    .mode-1 .resize-handle { display: none !important; }
 
-    /* MODE 3: Realistic Corkboard */
+    /* --- MODE 3: Realistic Corkboard --- */
     .mode-3 {
-      background-color: #8a6a4b;
-      background-image: 
-        radial-gradient(hsla(34, 40%, 25%, 0.3) 15%, transparent 16%), 
-        radial-gradient(hsla(34, 40%, 25%, 0.3) 15%, transparent 16%),
-        url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.15'/%3E%3C/svg%3E");
-      background-size: 20px 20px, 20px 20px, 200px 200px;
-      background-position: 0 0, 10px 10px, 0 0;
-    }
-    
-    .mode-3 .img-box {
-      background: #fdfdfd;
-      padding: 12px 12px 50px 12px;
-      border: none;
-      box-shadow: 2px 4px 8px rgba(0,0,0,0.1), 5px 15px 25px rgba(0,0,0,0.2);
-      background-image: linear-gradient(to bottom right, #fff 0%, #f9f9f9 100%);
+      background-color: #9e7e56;
+      background-image:
+        /* Subtle lighting — warm top-left highlight, darker bottom-right */
+        radial-gradient(ellipse at 15% 20%, rgba(195, 170, 130, 0.35) 0%, transparent 55%),
+        radial-gradient(ellipse at 85% 85%, rgba(80, 55, 30, 0.25) 0%, transparent 50%),
+        radial-gradient(ellipse at 50% 50%, rgba(160, 130, 85, 0.15) 0%, transparent 70%),
+        /* Fine grain — tiny dense noise like real cork fiber */
+        url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='a'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.8' numOctaves='6' stitchTiles='stitch' seed='2'/%3E%3CfeColorMatrix type='saturate' values='0.1'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23a)' opacity='0.18'/%3E%3C/svg%3E"),
+        /* Medium grain — irregular porous patches */
+        url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='b'%3E%3CfeTurbulence type='turbulence' baseFrequency='0.35' numOctaves='3' stitchTiles='stitch' seed='7'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23b)' opacity='0.09'/%3E%3C/svg%3E"),
+        /* Coarse grain — large-scale tonal variation like real cork sheets */
+        url("data:image/svg+xml,%3Csvg viewBox='0 0 300 300' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='c'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.08' numOctaves='2' stitchTiles='stitch' seed='12'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23c)' opacity='0.07'/%3E%3C/svg%3E");
+      background-size: cover, cover, cover, 512px 512px, 400px 400px, 300px 300px;
+      /* Thin wood frame edge effect */
+      box-shadow: inset 0 0 0 6px rgba(60, 40, 20, 0.35), inset 0 0 30px rgba(60, 40, 20, 0.15);
     }
 
-    /* 3D PINS */
+    .mode-3 .img-box {
+      background: linear-gradient(160deg, #fffffe 0%, #f8f7f2 40%, #f5f3ed 100%);
+      padding: 10px 10px 42px 10px;
+      box-shadow:
+        0 1px 2px rgba(0,0,0,0.06),
+        1px 3px 8px rgba(0,0,0,0.1),
+        3px 8px 20px rgba(0,0,0,0.14),
+        6px 16px 36px rgba(0,0,0,0.08);
+      /* Subtle paper grain */
+      background-image:
+        linear-gradient(160deg, rgba(255,255,255,0.6) 0%, transparent 30%),
+        url("data:image/svg+xml,%3Csvg viewBox='0 0 128 128' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='2.5' numOctaves='3' stitchTiles='stitch' seed='5'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23p)' opacity='0.03'/%3E%3C/svg%3E");
+      background-size: cover, 128px 128px;
+    }
+
+    /* Pins */
     .pin-handle {
-      position: absolute; top: -12px; left: 50%; width: 22px; height: 22px;
+      position: absolute; top: -11px; left: 50%;
+      width: 22px; height: 22px;
       border-radius: 50%; transform: translateX(-50%);
-      z-index: 50; cursor: move; 
-      box-shadow: inset -3px -3px 5px rgba(0,0,0,0.3), inset 2px 2px 5px rgba(255,255,255,0.6), 2px 3px 5px rgba(0,0,0,0.3);
-      border: 1px solid rgba(0,0,0,0.1);
+      z-index: 50; cursor: move;
+      box-shadow:
+        inset -3px -3px 5px rgba(0,0,0,0.3),
+        inset 2px 2px 4px rgba(255,255,255,0.5),
+        1px 3px 6px rgba(0,0,0,0.4),
+        0 8px 3px -4px rgba(0,0,0,0.15);
+      border: none;
+      display: none;
+    }
+    /* Spike shadow beneath pin */
+    .pin-handle::after {
+      content: '';
+      position: absolute; top: 100%; left: 50%;
+      transform: translateX(-50%);
+      width: 3px; height: 8px;
+      background: linear-gradient(to bottom, rgba(100,100,100,0.5), transparent);
+      border-radius: 0 0 1px 1px;
     }
     .mode-3 .pin-handle { display: block; }
-    
-    /* Pin Colors */
-    .pin-red { background-color: #ef4444; } .pin-blue { background-color: #3b82f6; }
-    .pin-green { background-color: #10b981; } .pin-yellow { background-color: #f59e0b; }
-    .pin-purple { background-color: #8b5cf6; }
 
-    .resize-handle { position: absolute; bottom: 0; left: 0; width: 100%; height: 50px; cursor: ns-resize; display: none; z-index: 40; }
+    .pin-red { background: linear-gradient(135deg, #f87171, #dc2626); }
+    .pin-blue { background: linear-gradient(135deg, #60a5fa, #2563eb); }
+    .pin-green { background: linear-gradient(135deg, #34d399, #059669); }
+    .pin-yellow { background: linear-gradient(135deg, #fbbf24, #d97706); }
+    .pin-purple { background: linear-gradient(135deg, #a78bfa, #7c3aed); }
+    .pin-white { background: linear-gradient(135deg, #f5f5f4, #d6d3d1); }
+
+    .resize-handle {
+      position: absolute; bottom: -4px; right: -4px;
+      width: 28px; height: 28px;
+      cursor: nwse-resize; display: none; z-index: 40;
+      border-radius: 0 0 4px 0;
+    }
+    .resize-handle::after {
+      content: ''; position: absolute; bottom: 6px; right: 6px;
+      width: 10px; height: 10px;
+      border-right: 2px solid rgba(0,0,0,0.2);
+      border-bottom: 2px solid rgba(0,0,0,0.2);
+    }
     .mode-3 .resize-handle { display: block; }
 
-    .media-container { width: 100%; height: 100%; overflow: hidden; position: relative; pointer-events: auto; cursor: pointer; }
+    .media-container {
+      width: 100%; height: 100%;
+      overflow: hidden; position: relative;
+      pointer-events: auto; cursor: pointer;
+    }
     .mode-1 .media-container { cursor: default; }
 
-    .media-item { width: 100%; height: 100%; object-fit: contain; opacity: 0; transition: opacity 0.5s; pointer-events: none; }
+    .media-item {
+      width: 100%; height: 100%;
+      object-fit: contain;
+      opacity: 0;
+      transition: opacity var(--transition-photos) ease;
+      pointer-events: none;
+      display: block;
+    }
     .media-item.loaded { opacity: 1; }
-    .mode-3 .media-item { object-fit: cover; filter: sepia(0.05) contrast(1.05); }
+    .mode-3 .media-item { object-fit: cover; }
 
-    /* KEN BURNS */
-    .ken-burns { animation: kenBurnsEffect 20s infinite alternate ease-in-out; }
-    @keyframes kenBurnsEffect { 0% { transform: scale(1.0); } 100% { transform: scale(1.15); } }
+    /* Crossfade: old image stays behind new one */
+    .media-container .media-item.fading-out {
+      position: absolute; top: 0; left: 0;
+      opacity: 0;
+      transition: opacity var(--transition-photos) ease;
+    }
 
-    /* --- STICKY NOTE UI --- */
-    #overlay { position: absolute; bottom: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 200; }
-    #sticky-container { position: absolute; bottom: 20px; left: 0; width: 100%; padding: 0 25px; box-sizing: border-box; display: flex; justify-content: space-between; align-items: flex-end; gap: 20px; pointer-events: none; }
-    
-    .sticky-note { position: relative; padding: 15px; box-shadow: 3px 6px 12px rgba(0,0,0,0.25); pointer-events: auto; cursor: pointer; font-family: 'Kalam', cursive; color: #333; transform-origin: center top; transition: transform 0.2s; min-width: 150px; }
-    .sticky-note:active { transform: scale(0.98) !important; }
-    
-    #time-widget { background: var(--sticky-yellow); transform: rotate(-1.5deg); text-align: center; }
-    #time { font-size: 2.8rem; font-weight: 700; line-height: 0.9; color: #1f2937; }
-    
-    #agenda-box { background: var(--sticky-pink); transform: rotate(1.2deg); display: flex; gap: 15px; text-align: center; }
-    .day-col { display: flex; flex-direction: column; }
-    .day-label { font-size: 0.75rem; text-transform: uppercase; color: #666; font-weight: 700; }
-    .day-date { font-size: 1.5rem; font-weight: 700; line-height: 1; }
-    
-    #weather-box { background: var(--sticky-blue); transform: rotate(-0.8deg); text-align: right; display: flex; flex-direction: column; align-items: flex-end; }
-    #weather-main { display: flex; align-items: center; gap: 8px; }
-    #weather-icon { font-size: 36px; color: #2563eb; }
-    #temp { font-size: 2.4rem; font-weight: 700; line-height: 1; }
-    #condition { font-size: 0.9rem; font-weight: 600; text-transform: capitalize; }
-    #weather-details { font-size: 0.8rem; color: #444; margin-top: 5px; font-family: 'Inter', sans-serif; line-height: 1.2; text-align: right; }
+    /* Ken Burns */
+    .ken-burns { animation: kb 22s infinite alternate ease-in-out; }
+    @keyframes kb {
+      0% { transform: scale(1.0) translate(0, 0); }
+      100% { transform: scale(1.12) translate(-1%, -1%); }
+    }
 
-    #ticker-tape { position: absolute; bottom: 85px; left: 50%; transform: translateX(-50%) rotate(0.3deg); background: rgba(255,255,255,0.9); border-left: 3px solid rgba(0,0,0,0.05); border-right: 3px solid rgba(0,0,0,0.05); padding: 6px 50px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); font-family: 'Permanent Marker', cursive; font-size: 1.1rem; color: #333; pointer-events: none; white-space: nowrap; z-index: 190; mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent); -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent); }
+    /* Photo caption area in polaroid bottom */
+    .photo-caption {
+      position: absolute; bottom: 8px; left: 12px; right: 12px;
+      height: 28px;
+      font-family: 'Kalam', cursive;
+      font-size: 0.75rem; color: #999;
+      display: none;
+      align-items: center; justify-content: center;
+      text-align: center;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+    .mode-3 .photo-caption { display: flex; }
 
-    .widget-pin { position: absolute; top: -10px; left: 50%; transform: translateX(-50%); width: 16px; height: 16px; border-radius: 50%; box-shadow: inset -2px -2px 4px rgba(0,0,0,0.2), 1px 2px 4px rgba(0,0,0,0.3); z-index: 210; border: 1px solid rgba(0,0,0,0.1); }
-    .wp-red { background: #ef4444; } .wp-green { background: #10b981; } .wp-blue { background: #3b82f6; }
+    /* ============================
+       OVERLAY UI
+    ============================ */
+    #overlay {
+      position: absolute; bottom: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none; z-index: 100;
+    }
 
-    /* --- SETTINGS --- */
-    #settings-btn { position: absolute; top: 30px; right: 30px; z-index: 300; width: 50px; height: 50px; background: rgba(255,255,255,0.9); backdrop-filter: blur(10px); border-radius: 50%; color: #333; display: flex; align-items: center; justify-content: center; font-size: 26px; cursor: pointer; pointer-events: auto; box-shadow: 0 4px 15px rgba(0,0,0,0.15); transition: transform 0.2s; }
-    #settings-panel { position: absolute; top: 0; right: -360px; width: 340px; height: 100%; background: #111; color: #eee; z-index: 280; transition: right 0.35s cubic-bezier(0.19, 1, 0.22, 1); padding: 30px; box-sizing: border-box; border-left: 1px solid #333; overflow-y: auto; }
+    #sticky-container {
+      position: absolute; bottom: 16px; left: 0; width: 100%;
+      padding: 0 20px; box-sizing: border-box;
+      display: flex; justify-content: space-between; align-items: flex-end;
+      gap: 16px; pointer-events: none;
+      transition: opacity 0.4s, transform 0.4s;
+    }
+    #sticky-container.hidden { opacity: 0; transform: translateY(20px); pointer-events: none; }
+
+    .sticky-note {
+      position: relative; padding: 16px 18px;
+      pointer-events: auto; cursor: pointer;
+      font-family: 'Kalam', cursive; color: #2a2a2a;
+      transform-origin: center bottom;
+      transition: transform 0.2s;
+      /* 3D depth: layered shadows for lifted paper effect */
+      box-shadow:
+        0 1px 1px rgba(0,0,0,0.06),
+        0 2px 4px rgba(0,0,0,0.08),
+        0 6px 12px rgba(0,0,0,0.12),
+        0 14px 28px rgba(0,0,0,0.10),
+        /* Bottom-right curl shadow */
+        3px 3px 6px rgba(0,0,0,0.08);
+      /* Slight paper texture gradient */
+      background-image: linear-gradient(135deg, rgba(255,255,255,0.4) 0%, transparent 40%, transparent 60%, rgba(0,0,0,0.02) 100%);
+      background-blend-mode: overlay;
+    }
+    .sticky-note::before {
+      /* Folded corner effect */
+      content: '';
+      position: absolute; bottom: 0; right: 0;
+      width: 20px; height: 20px;
+      background: linear-gradient(225deg, rgba(0,0,0,0.06) 0%, rgba(0,0,0,0.02) 45%, transparent 50%);
+      pointer-events: none;
+    }
+    .sticky-note::after {
+      /* Subtle adhesive strip shadow at top */
+      content: '';
+      position: absolute; top: 0; left: 15%; right: 15%; height: 3px;
+      background: linear-gradient(to right, transparent, rgba(0,0,0,0.04), transparent);
+      pointer-events: none;
+    }
+    .sticky-note:active { transform: scale(0.97) !important; }
+
+    .widget-pin {
+      position: absolute; top: -8px; left: 50%; transform: translateX(-50%);
+      width: 14px; height: 14px; border-radius: 50%;
+      box-shadow:
+        inset -2px -2px 3px rgba(0,0,0,0.3),
+        inset 1px 1px 2px rgba(255,255,255,0.4),
+        1px 2px 4px rgba(0,0,0,0.4),
+        0 0 0 1px rgba(0,0,0,0.05);
+      z-index: 60;
+      border: none;
+    }
+    .wp-red { background: linear-gradient(135deg, #fca5a5, #dc2626); }
+    .wp-green { background: linear-gradient(135deg, #6ee7b7, #059669); }
+    .wp-blue { background: linear-gradient(135deg, #93c5fd, #2563eb); }
+
+    /* Time Widget */
+    #time-widget {
+      background: #fefce8;
+      background-image: linear-gradient(135deg, rgba(255,255,255,0.5) 0%, transparent 40%, transparent 60%, rgba(0,0,0,0.02) 100%);
+      transform: rotate(-1.8deg);
+      text-align: center; min-width: 130px;
+    }
+    #time-display {
+      font-size: 2.6rem; font-weight: 700; line-height: 1;
+      color: #1a1a1a; letter-spacing: -1px;
+      font-family: 'Kalam', cursive;
+    }
+    #ampm { font-size: 0.75rem; font-weight: 400; color: #777; margin-left: 2px; font-family: 'Kalam', cursive; }
+    #date-line {
+      font-size: 0.72rem; color: #666; margin-top: 5px;
+      font-family: 'Kalam', cursive; font-weight: 400;
+    }
+
+    /* Agenda Widget */
+    #agenda-box {
+      background: #fce7f3;
+      background-image: linear-gradient(135deg, rgba(255,255,255,0.45) 0%, transparent 40%, transparent 60%, rgba(0,0,0,0.02) 100%);
+      transform: rotate(1.2deg);
+      display: flex; gap: 14px; text-align: center;
+    }
+    .day-col { display: flex; flex-direction: column; gap: 2px; }
+    .day-label { font-size: 0.62rem; text-transform: uppercase; color: #888; font-weight: 700; letter-spacing: 0.5px; font-family: 'Kalam', cursive; }
+    .day-date { font-size: 1.5rem; font-weight: 700; line-height: 1; color: #2a2a2a; font-family: 'Kalam', cursive; }
+    .day-sub { font-size: 0.62rem; color: #888; font-family: 'Kalam', cursive; }
+    .day-divider { width: 1px; background: rgba(0,0,0,0.1); align-self: stretch; margin: 4px 0; }
+
+    /* Weather Widget — expanded to absorb ticker data */
+    #weather-box {
+      background: #e0f2fe;
+      background-image: linear-gradient(135deg, rgba(255,255,255,0.5) 0%, transparent 40%, transparent 60%, rgba(0,0,0,0.02) 100%);
+      transform: rotate(-0.8deg);
+      display: flex; flex-direction: column; align-items: flex-end;
+      min-width: 175px; max-width: 220px;
+      text-align: right;
+    }
+    #weather-main { display: flex; align-items: center; gap: 6px; }
+    #weather-icon { font-size: 28px; color: #0369a1; }
+    #temp { font-size: 2.2rem; font-weight: 700; line-height: 1; color: #1a1a1a; font-family: 'Kalam', cursive; }
+    #condition { font-size: 0.78rem; font-weight: 600; text-transform: capitalize; color: #3a3a3a; font-family: 'Kalam', cursive; }
+    #weather-details {
+      font-size: 0.62rem; color: #555; margin-top: 4px;
+      font-family: 'Kalam', cursive; line-height: 1.45;
+      text-align: right;
+    }
+    #weather-tomorrow {
+      font-size: 0.58rem; color: #777; margin-top: 3px;
+      font-family: 'Kalam', cursive; line-height: 1.3;
+      text-align: right;
+      border-top: 1px dashed rgba(0,0,0,0.1);
+      padding-top: 3px;
+    }
+
+    /* Ticker tape removed — weather info condensed into sticky */
+
+    /* Photo counter removed */
+
+    /* ============================
+       SETTINGS PANEL
+    ============================ */
+    #settings-btn {
+      position: absolute; top: 24px; right: 24px; z-index: 300;
+      width: 44px; height: 44px;
+      background: rgba(0,0,0,0.35); backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 50%;
+      color: rgba(255,255,255,0.7);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px; cursor: pointer; pointer-events: auto;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+      transition: transform 0.2s, background 0.2s;
+    }
+    #settings-btn:hover { background: rgba(0,0,0,0.5); }
+    #settings-btn:active { transform: scale(0.9); }
+    #settings-btn .material-symbols-rounded { transition: transform 0.4s; }
+    #settings-btn.active .material-symbols-rounded { transform: rotate(90deg); }
+
+    #settings-panel {
+      position: absolute; top: 0; right: -380px;
+      width: 360px; height: 100%;
+      background: var(--panel-bg);
+      color: var(--panel-text);
+      z-index: 280;
+      transition: right 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+      padding: 0; box-sizing: border-box;
+      border-left: 1px solid var(--panel-border);
+      overflow-y: auto; overflow-x: hidden;
+      scrollbar-width: thin;
+      scrollbar-color: #333 transparent;
+    }
     #settings-panel.open { right: 0; }
-    .settings-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; padding-bottom: 15px; border-bottom: 1px solid #333; }
-    .settings-title { font-family: 'Permanent Marker', cursive; font-size: 1.6rem; color: #fff; }
-    .close-settings { cursor: pointer; width: 38px; height: 38px; background: #333; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; color: #fff; }
-    
-    .setting-group { margin-bottom: 25px; padding-bottom: 20px; border-bottom: 1px solid #222; }
-    .setting-label { font-size: 0.85rem; color: #666; margin-bottom: 12px; display: block; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 700; }
-    .pro-btn { display: block; width: 100%; padding: 15px; margin-bottom: 12px; background: #222; border: 1px solid #333; color: #eee; border-radius: 14px; text-align: left; cursor: pointer; font-weight: 600; transition: all 0.2s; }
-    .btn-primary { background: var(--accent-color); border: none; color: white; }
-    .btn-active { border: 1px solid var(--accent-color); color: var(--accent-color); background: rgba(59, 130, 246, 0.1); }
-    .pro-select { width: 100%; padding: 15px; background: #222; border: 1px solid #333; color: white; border-radius: 14px; font-size: 1rem; outline: none; margin-bottom: 15px; }
-    input[type=range] { width: 100%; margin: 12px 0; accent-color: var(--accent-color); }
 
-    /* Calendar Modal */
-    #calendar-modal { position: absolute; bottom: -100%; left: 0; width: 100%; height: 95%; background: #fff; transition: bottom 0.45s cubic-bezier(0.19, 1, 0.22, 1); z-index: 400; border-top-left-radius: 28px; border-top-right-radius: 28px; overflow: hidden; box-shadow: 0 -15px 60px rgba(0,0,0,0.5); }
+    .settings-header {
+      position: sticky; top: 0; z-index: 10;
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 20px 24px;
+      background: var(--panel-bg);
+      border-bottom: 1px solid var(--panel-border);
+    }
+    .settings-title {
+      font-family: 'Permanent Marker', cursive;
+      font-size: 1.3rem; color: #fff;
+    }
+    .close-settings {
+      cursor: pointer; width: 34px; height: 34px;
+      background: var(--panel-card); border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; color: var(--panel-muted);
+      border: 1px solid var(--panel-border);
+      transition: all 0.2s;
+    }
+    .close-settings:active { transform: scale(0.92); }
+
+    .settings-body { padding: 16px 24px 40px; }
+
+    .setting-group {
+      margin-bottom: 20px; padding-bottom: 18px;
+      border-bottom: 1px solid var(--panel-border);
+    }
+    .setting-group:last-child { border-bottom: none; }
+
+    .setting-label {
+      font-size: 0.65rem; color: var(--panel-muted);
+      margin-bottom: 10px; display: block;
+      text-transform: uppercase; letter-spacing: 2px; font-weight: 600;
+    }
+
+    .pro-btn {
+      display: flex; align-items: center; justify-content: space-between;
+      width: 100%; padding: 12px 16px; margin-bottom: 8px;
+      background: var(--panel-card);
+      border: 1px solid var(--panel-border);
+      color: var(--panel-text); border-radius: 12px;
+      text-align: left; cursor: pointer; font-weight: 500;
+      font-size: 0.85rem; font-family: 'DM Sans', sans-serif;
+      transition: all 0.15s;
+    }
+    .pro-btn:active { transform: scale(0.98); background: #1a1a26; }
+    .pro-btn .btn-tag {
+      font-size: 0.65rem; padding: 2px 8px;
+      border-radius: 6px; font-weight: 600;
+      background: var(--panel-border); color: var(--panel-muted);
+    }
+    .btn-primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .btn-primary .btn-tag { background: rgba(255,255,255,0.2); color: #fff; }
+    .btn-active { border-color: var(--accent); }
+    .btn-active .btn-tag { background: var(--accent); color: #fff; }
+    .btn-danger { background: #1c1015; border-color: #2a1520; color: #f87171; }
+
+    .pro-select {
+      width: 100%; padding: 12px 16px;
+      background: var(--panel-card);
+      border: 1px solid var(--panel-border);
+      color: #fff; border-radius: 12px;
+      font-size: 0.85rem; outline: none; margin-bottom: 10px;
+      font-family: 'DM Sans', sans-serif;
+    }
+
+    .slider-row {
+      display: flex; align-items: center; gap: 12px;
+      margin-bottom: 10px;
+    }
+    .slider-row label {
+      font-size: 0.8rem; color: #aaa; min-width: 80px;
+    }
+    .slider-row input[type=range] {
+      flex: 1; accent-color: var(--accent);
+      height: 4px;
+    }
+    .slider-row .slider-val {
+      font-size: 0.75rem; color: var(--accent);
+      min-width: 36px; text-align: right; font-weight: 600;
+    }
+
+    #storage-status {
+      font-size: 0.65rem; color: var(--panel-muted);
+      margin: 4px 0 10px; padding: 0 2px;
+    }
+
+    /* ============================
+       CALENDAR MODAL
+    ============================ */
+    #calendar-modal {
+      position: absolute; bottom: -100%; left: 0;
+      width: 100%; height: 95%;
+      background: #fff;
+      transition: bottom 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      z-index: 400;
+      border-top-left-radius: 20px; border-top-right-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 -10px 60px rgba(0,0,0,0.5);
+    }
     #calendar-modal.show { bottom: 0; }
-    .cal-header { height: 65px; display: flex; justify-content: space-between; align-items: center; padding: 0 30px; border-bottom: 1px solid #eee; color: #333; font-weight: 800; font-size: 20px; }
-    .close-cal { cursor: pointer; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; background: #f3f4f6; border-radius: 50%; font-size: 20px; }
+    .cal-header {
+      height: 56px; display: flex; justify-content: space-between; align-items: center;
+      padding: 0 24px; border-bottom: 1px solid #eee;
+      color: #333; font-weight: 700; font-size: 16px;
+      font-family: 'DM Sans', sans-serif;
+    }
+    .close-cal {
+      cursor: pointer; width: 32px; height: 32px;
+      display: flex; align-items: center; justify-content: center;
+      background: #f3f4f6; border-radius: 50%; font-size: 16px;
+    }
 
+    /* ============================
+       TOAST NOTIFICATIONS
+    ============================ */
+    #toast {
+      position: fixed; bottom: 100px; left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: rgba(0,0,0,0.8); backdrop-filter: blur(12px);
+      color: #fff; padding: 10px 24px;
+      border-radius: 12px; font-size: 0.8rem;
+      font-family: 'DM Sans', sans-serif; font-weight: 500;
+      opacity: 0; transition: all 0.3s; z-index: 500;
+      pointer-events: none;
+    }
+    #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* Hide scrollbar on settings */
+    #settings-panel::-webkit-scrollbar { width: 4px; }
+    #settings-panel::-webkit-scrollbar-track { background: transparent; }
+    #settings-panel::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
   </style>
 </head>
 
 <body>
-  <input type="file" id="fileInput" webkitdirectory directory multiple style="display:none" />
-  <video id="wake-video" loop playsinline muted style="display:none"><source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4" /></video>
+  <input type="file" id="fileInput" webkitdirectory directory multiple accept="image/*,video/*" style="display:none" />
 
   <div id="container">
     <div id="settings-btn"><span class="material-symbols-rounded">settings</span></div>
 
     <div id="settings-panel">
       <div class="settings-header">
-          <div class="settings-title">Adam's Frame</div>
-          <div class="close-settings" id="btn-close-settings">✕</div>
+        <div class="settings-title">Adam's Frame</div>
+        <div class="close-settings" id="btn-close-settings">
+          <span class="material-symbols-rounded" style="font-size:18px">close</span>
+        </div>
       </div>
+      <div class="settings-body">
 
-      <div class="setting-group">
-        <span class="setting-label">Display</span>
-        <label style="font-size:0.9rem; color:#ccc; display:flex; justify-content:space-between;">
-          Brightness <span id="bright-val">100%</span>
-        </label>
-        <input type="range" id="brightness-slider" min="0.2" max="1" step="0.1" value="1">
-        <button id="btn-auto-bright" class="pro-btn">Night Auto-Dim: OFF</button>
-      </div>
+        <div class="setting-group">
+          <span class="setting-label">Display</span>
+          <div class="slider-row">
+            <label>Brightness</label>
+            <input type="range" id="brightness-slider" min="20" max="100" step="5" value="100">
+            <span class="slider-val" id="bright-val">100%</span>
+          </div>
+          <div class="slider-row">
+            <label>Transition</label>
+            <input type="range" id="transition-slider" min="3" max="20" step="1" value="9">
+            <span class="slider-val" id="trans-val">0.9s</span>
+          </div>
+          <button id="btn-auto-bright" class="pro-btn">
+            Night Auto-Dim <span class="btn-tag">OFF</span>
+          </button>
+          <button id="btn-screen-wake" class="pro-btn">
+            Keep Screen On <span class="btn-tag">OFF</span>
+          </button>
+        </div>
 
-      <div class="setting-group">
-        <span class="setting-label">Photos</span>
-        <button class="pro-btn btn-primary" id="btn-upload">+ Load Folder</button>
-        <div id="storage-status">Memory: Checking...</div>
-        <button class="pro-btn" id="btn-clear" style="background:#332222; color:#ff8888; font-size:0.85rem;">Wipe Internal Memory</button>
-      </div>
+        <div class="setting-group">
+          <span class="setting-label">Photos</span>
+          <button class="pro-btn btn-primary" id="btn-upload">
+            <span>Load Folder</span>
+            <span class="material-symbols-rounded" style="font-size:18px">folder_open</span>
+          </button>
+          <div id="storage-status">Checking memory...</div>
+          <button class="pro-btn btn-danger" id="btn-clear">
+            <span>Clear All Photos</span>
+            <span class="material-symbols-rounded" style="font-size:16px">delete_forever</span>
+          </button>
+        </div>
 
-      <div class="setting-group">
-        <span class="setting-label">Logic</span>
-        <select id="timer-select" class="pro-select">
-          <option value="60000">1 Minute</option>
-          <option value="300000">5 Minutes</option>
-          <option value="900000">15 Minutes</option>
-          <option value="3600000" selected>1 Hour</option>
-          <option value="10800000">3 Hours</option>
-          <option value="static">Static</option>
-        </select>
-        
-        <button id="btn-rotate" class="pro-btn">Rotate Canvas (⟳)</button>
-        <button id="btn-layout" class="pro-btn">Layout: Corkboard</button>
-        <button id="btn-auto-arrange" class="pro-btn">Auto-Arrange: ON</button>
-        <button id="btn-shuffle" class="pro-btn">Shuffle: OFF</button>
-        <button id="btn-motion" class="pro-btn">Motion: OFF</button>
-        <button id="btn-fullscreen" class="pro-btn">Full Screen</button>
+        <div class="setting-group">
+          <span class="setting-label">Slideshow</span>
+          <select id="timer-select" class="pro-select">
+            <option value="30000">30 Seconds</option>
+            <option value="60000">1 Minute</option>
+            <option value="300000">5 Minutes</option>
+            <option value="600000">10 Minutes</option>
+            <option value="900000">15 Minutes</option>
+            <option value="1800000">30 Minutes</option>
+            <option value="3600000">1 Hour</option>
+            <option value="10800000">3 Hours</option>
+            <option value="static">Static (Manual)</option>
+          </select>
+          <button id="btn-shuffle" class="pro-btn">
+            Shuffle <span class="btn-tag">ON</span>
+          </button>
+          <button id="btn-motion" class="pro-btn">
+            Ken Burns Motion <span class="btn-tag">OFF</span>
+          </button>
+        </div>
+
+        <div class="setting-group">
+          <span class="setting-label">Layout</span>
+          <button id="btn-layout" class="pro-btn">
+            Mode <span class="btn-tag">CORKBOARD</span>
+          </button>
+          <button id="btn-auto-arrange" class="pro-btn">
+            Auto-Arrange <span class="btn-tag">ON</span>
+          </button>
+          <button id="btn-reset-pins" class="pro-btn" style="display:none">
+            Reset Layout <span class="btn-tag">↺</span>
+          </button>
+        </div>
+
+        <div class="setting-group">
+          <span class="setting-label">Tools</span>
+          <button id="btn-rotate" class="pro-btn">
+            Rotate Canvas <span class="btn-tag">0°</span>
+          </button>
+          <button id="btn-fullscreen" class="pro-btn">
+            Fullscreen <span class="material-symbols-rounded" style="font-size:16px">fullscreen</span>
+          </button>
+        </div>
+
       </div>
     </div>
 
-    <!-- Media Layer -->
+    <!-- Photo Layer -->
     <div id="photo-wrapper" class="mode-3">
-      <div id="box-1" class="img-box" style="top:10%; left:10%; width:300px;">
+      <div id="box-1" class="img-box">
         <div class="pin-handle"></div>
         <div class="media-container" data-box="1"></div>
+        <div class="photo-caption"></div>
         <div class="resize-handle"></div>
       </div>
-      <div id="box-2" class="img-box" style="top:15%; left:50%; width:300px;">
+      <div id="box-2" class="img-box">
         <div class="pin-handle"></div>
         <div class="media-container" data-box="2"></div>
+        <div class="photo-caption"></div>
         <div class="resize-handle"></div>
       </div>
-      <div id="box-3" class="img-box" style="top:45%; left:30%; width:300px;">
+      <div id="box-3" class="img-box">
         <div class="pin-handle"></div>
         <div class="media-container" data-box="3"></div>
+        <div class="photo-caption"></div>
         <div class="resize-handle"></div>
       </div>
     </div>
 
-    <!-- Sticky UI Layer -->
+    <!-- Overlay UI -->
     <div id="overlay">
-      <div id="ticker-tape">Connecting to memories...</div>
-      
       <div id="sticky-container">
         <div id="time-widget" class="sticky-note">
           <div class="widget-pin wp-red"></div>
-          <div id="time">00:00</div>
+          <div id="time-display">00:00</div>
+          <div id="date-line">Loading...</div>
         </div>
 
         <div id="agenda-box" class="sticky-note">
@@ -246,572 +643,16 @@
           <div class="day-col">
             <span class="day-label">Today</span>
             <span class="day-date" id="date-today">--</span>
+            <span class="day-sub" id="date-today-sub"></span>
           </div>
-          <div style="width:1px; background:rgba(0,0,0,0.1);"></div>
+          <div class="day-divider"></div>
           <div class="day-col">
-            <span class="day-label">Tomrw</span>
+            <span class="day-label">Tomorrow</span>
             <span class="day-date" id="date-tmrw">--</span>
+            <span class="day-sub" id="date-tmrw-sub"></span>
           </div>
         </div>
 
-        <div id="weather-box" class="sticky-note">
-          <div class="widget-pin wp-blue"></div>
-          <div id="weather-main">
-            <div id="temp">--°</div>
-            <span class="material-symbols-rounded" id="weather-icon">wb_sunny</span>
-          </div>
-          <div id="condition">Fair</div>
-          <div id="weather-details">Calculating...</div>
-        </div>
-      </div>
-    </div>
-
-    <div id="calendar-modal">
-      <div class="cal-header">
-        <span>Calendar View</span>
-        <div class="close-cal" id="btn-close-cal">✕</div>
-      </div>
-      <iframe src="https://calendar.google.com/calendar/embed?src=runner4evs%40gmail.com&ctz=America%2FDenver&mode=MONTH&showTitle=0&showNav=1&showDate=1&showPrint=0&showTabs=0&showCalendars=0&bgcolor=%23ffffff" style="border:0; width:100%; height:100%;" frameborder="0" scrolling="no"></iframe>
-    </div>
-  </div>
-
-<script>
-  /* ---------------------------
-    State
-  --------------------------- */
-  const state = {
-    mediaItems: [], indices: [0, 1, 2], layoutMode: 3,
-    shuffleActive: false, motionActive: false, autoArrangeActive: true,
-    screenRotState: 0, userLat: 40.3769, userLon: -111.7958,
-    slideDuration: 3600000, timers: [null, null, null], timeouts: [null, null, null],
-    loadedRatios: { 1: 1, 2: 1, 3: 1 }, currentObjectUrls: { 1: null, 2: null, 3: null },
-    pinColors: ['pin-red', 'pin-blue', 'pin-green', 'pin-yellow', 'pin-purple'],
-    autoBright: false, manualBright: 1
-  };
-
-  /* ---------------------------
-    IndexedDB (Safe Version)
-  --------------------------- */
-  const DB_NAME='FrameDB', STORE_NAME='mediaStore';
-  function initDB() { return new Promise((res, rej) => { const r = indexedDB.open(DB_NAME, 2); r.onerror=()=>rej(); r.onupgradeneeded=e=>{ const db=e.target.result; if(!db.objectStoreNames.contains(STORE_NAME)) db.createObjectStore(STORE_NAME, { keyPath:'id' }); }; r.onsuccess=e=>res(e.target.result); }); }
-  function makeFileId(f) { return `${f.webkitRelativePath||f.name}::${f.size}::${f.lastModified}`; }
-
-  async function saveFilesToDB(files) {
-    const status = document.getElementById('storage-status'); status.innerText = "Initializing...";
-    const db = await initDB(); const validFiles = Array.from(files).filter(f => f.type.match(/^(image|video)/));
-    const total = validFiles.length; let processed = 0; const CHUNK_SIZE = 50;
-    const processChunk = async (startIndex) => {
-      if (startIndex >= total) { status.innerText = `${total} Items Stored.`; loadFromDB(); return; }
-      const tx = db.transaction(STORE_NAME, 'readwrite'); const store = tx.objectStore(STORE_NAME);
-      const endIndex = Math.min(startIndex + CHUNK_SIZE, total);
-      for (let i = startIndex; i < endIndex; i++) { const f = validFiles[i]; store.put({ id: makeFileId(f), type: f.type.startsWith('video')?'video':'image', file: f }); }
-      tx.oncomplete = () => { processed = endIndex; status.innerText = `Saving ${processed}/${total}...`; setTimeout(() => processChunk(endIndex), 10); };
-    };
-    processChunk(0);
-  }
-
-  async function loadFromDB() {
-    try {
-      const db = await initDB(), tx = db.transaction(STORE_NAME, 'readonly'), req = tx.objectStore(STORE_NAME).getAll();
-      req.onsuccess = () => {
-        state.mediaItems = (req.result || []).map(r => ({ id:r.id, type:r.type, file:r.file }));
-        document.getElementById('storage-status').innerText = state.mediaItems.length ? `${state.mediaItems.length} Memories Loaded.` : "Storage Empty.";
-        refreshAll();
-      };
-    } catch (e) { document.getElementById('storage-status').innerText = "DB Link Error"; }
-  }
-
-  async function clearMemory() {
-    const db = await initDB(), tx = db.transaction(STORE_NAME, 'readwrite'); tx.objectStore(STORE_NAME).clear();
-    tx.oncomplete = () => { [1,2,3].forEach(revokeBoxUrl); state.mediaItems = []; refreshAll(); document.getElementById('storage-status').innerText = "Memory Wiped."; };
-  }
-
-  /* ---------------------------
-    Helpers
-  --------------------------- */
-  function revokeBoxUrl(n) { if (state.currentObjectUrls[n]) { URL.revokeObjectURL(state.currentObjectUrls[n]); state.currentObjectUrls[n] = null; } }
-  function getItemUrl(n, item) { revokeBoxUrl(n); const u = URL.createObjectURL(item.file); state.currentObjectUrls[n] = u; return u; }
-  function getNextIdx(curr) {
-    const L = state.mediaItems.length; if (!L) return 0;
-    if (state.shuffleActive) { if (L===1) return 0; let n; do { n=Math.floor(Math.random()*L); } while (n===curr); return n; }
-    return (curr + 1) % L;
-  }
-
-  function renderBox(n, idx) {
-    const box = document.getElementById('box-'+n), con = box.querySelector('.media-container'); con.innerHTML = '';
-    if (!state.mediaItems || state.mediaItems.length === 0) return;
-    const item = state.mediaItems[idx] || state.mediaItems[0];
-    const el = document.createElement(item.type === 'video' ? 'video' : 'img');
-    el.className = 'media-item';
-    if (state.motionActive && item.type === 'image' && !document.hidden) el.classList.add('ken-burns');
-
-    const pin = box.querySelector('.pin-handle');
-    if (pin) {
-      let color = null; try { const d = JSON.parse(localStorage.getItem('cork_layout')); if (d && d[n] && d[n].pin) color = d[n].pin; } catch(e){}
-      if (!color) color = state.pinColors[Math.floor(Math.random()*state.pinColors.length)];
-      pin.className = 'pin-handle ' + color;
-      if(state.layoutMode === 3) saveCork(); 
-    }
-
-    const onLoad = () => {
-      el.classList.add('loaded');
-      const r = item.type==='video' ? el.videoHeight/el.videoWidth : el.naturalHeight/el.naturalWidth;
-      state.loadedRatios[n] = r || 1;
-      if (state.layoutMode === 3) {
-        if (state.autoArrangeActive) applySmartLayout();
-        else { const w = parseInt(box.style.width)||300; box.style.height = (w*(r||1)+50)+'px'; }
-        saveCork();
-      }
-    };
-    if (item.type==='video') { el.loop=true; el.muted=true; el.autoplay=true; el.playsInline=true; el.oncanplay=onLoad; } else el.onload=onLoad;
-    el.src = getItemUrl(n, item); con.appendChild(el);
-  }
-
-  function refreshAll() {
-    document.getElementById('photo-wrapper').className = 'mode-' + state.layoutMode;
-    const sticky = document.getElementById('sticky-container'), ticker = document.getElementById('ticker-tape');
-    sticky.style.opacity = ticker.style.opacity = (state.layoutMode === 1) ? '0' : '1';
-
-    renderBox(1, state.indices[0]);
-    const b2=document.getElementById('box-2'), b3=document.getElementById('box-3');
-    if (state.layoutMode === 3) { 
-        b2.style.display='flex'; renderBox(2, state.indices[1]); 
-        b3.style.display='flex'; renderBox(3, state.indices[2]); loadCork(); 
-    } else { 
-        b2.style.display='none'; revokeBoxUrl(2); b3.style.display='none'; revokeBoxUrl(3); 
-    }
-    updateTimer(document.getElementById('timer-select').value);
-  }
-
-  function updateTimer(val) {
-    state.timers.forEach(t => t && clearInterval(t)); state.timeouts.forEach(t => t && clearTimeout(t));
-    state.timers = [null,null,null]; state.timeouts = [null,null,null];
-    if (val === 'static') return;
-    const dur = parseInt(val, 10);
-    const tick = (n, i) => { if (state.mediaItems.length) { state.indices[i] = getNextIdx(state.indices[i]); renderBox(n, state.indices[i]); } };
-    state.timers[0] = setInterval(() => tick(1,0), dur);
-    if (state.layoutMode === 3) {
-        state.timeouts[1] = setTimeout(() => { tick(2,1); state.timers[1] = setInterval(() => tick(2,1), dur); }, dur/3);
-        state.timeouts[2] = setTimeout(() => { tick(3,2); state.timers[2] = setInterval(() => tick(3,2), dur); }, (dur/3)*2);
-    }
-  }
-
-  /* ---------------------------
-    Smart Layout (ORGANIC UPDATED)
-  --------------------------- */
-  function applySmartLayout() {
-    if (state.layoutMode !== 3 || !state.autoArrangeActive) return;
-    const W = window.innerWidth, H = window.innerHeight;
-    
-    // Safety Padding
-    const topPad = 30, bottomPad = 220; 
-    const usableH = Math.max(200, H - topPad - bottomPad);
-
-    const ratios = { 1: state.loadedRatios[1]||1, 2: state.loadedRatios[2]||1, 3: state.loadedRatios[3]||1 };
-    const rList = [ratios[1], ratios[2], ratios[3]];
-    const portraits = rList.filter(r => r >= 1.05).length;
-
-    const setBox = (i, x, y, w) => {
-      const b = document.getElementById('box-'+i);
-      const r = ratios[i];
-      const h = (w * r + 50);
-      
-      // CLAMP: Prevent bleeding off screen
-      const clampedX = Math.max(10, Math.min(W - w - 10, x));
-      const clampedY = Math.max(topPad, Math.min(H - h - 100, y)); // Hard floor above stickies
-
-      b.style.width = w + 'px'; b.style.height = h + 'px';
-      b.style.left = clampedX + 'px'; b.style.top = clampedY + 'px';
-      b.style.zIndex = Math.floor(Math.random() * 10) + 1; // Organic Layering
-      b.style.transform = `rotate(${(Math.random()*8-4).toFixed(1)}deg)`;
-    };
-
-    const fitW = (r) => Math.floor((usableH - 60) / Math.max(0.6, r));
-
-    if (portraits >= 2) {
-      // TRIPTYCH (Organic Spaced)
-      const gap = Math.floor(W * 0.04);
-      const colW = Math.max(200, Math.min(Math.floor((W - gap * 4) / 3), fitW(Math.max(...rList))));
-      const rowTop = topPad + (usableH / 4) - (colW / 4); // Lifted
-      
-      setBox(1, gap, rowTop, colW);
-      setBox(2, gap * 2 + colW, rowTop - 20, colW);
-      setBox(3, gap * 3 + colW * 2, rowTop + 10, colW);
-    } else {
-      // PYRAMID (Cluster Weighted)
-      const ids = [1,2,3].sort((a,b) => (ratios[b]||1) - (ratios[a]||1));
-      const [cId, sA, sB] = ids;
-      const cW = Math.max(240, Math.min(Math.floor(W * 0.45), fitW(ratios[cId])));
-      const sW = Math.max(200, Math.min(Math.floor(W * 0.28), fitW(Math.max(ratios[sA], ratios[sB]))));
-      
-      const cTop = topPad + 10;
-      const sTop = topPad + Math.floor(usableH * 0.1);
-
-      setBox(cId, (W/2)-(cW/2), cTop, cW);
-      setBox(sA, 40, sTop, sW);
-      setBox(sB, W - sW - 40, sTop, sW);
-    }
-    saveCork();
-  }
-
-  function saveCork() { if (state.layoutMode!==3) return; const d={}; [1,2,3].forEach(i=>{ const b=document.getElementById('box-'+i), p=b.querySelector('.pin-handle'); let c=''; if(p) state.pinColors.forEach(pc=>{if(p.classList.contains(pc))c=pc;}); d[i]={t:b.style.top, l:b.style.left, w:b.style.width, h:b.style.height, r:b.style.transform, pin:c}; }); localStorage.setItem('cork_layout', JSON.stringify(d)); }
-  function loadCork() { try{ const d=JSON.parse(localStorage.getItem('cork_layout')); if(d) [1,2,3].forEach(i=>{ if(d[i]){ const b=document.getElementById('box-'+i); b.style.top=d[i].t; b.style.left=d[i].l; b.style.width=d[i].w; b.style.height=d[i].h; b.style.transform=d[i].r; if(d[i].pin){const p=b.querySelector('.pin-handle'); if(p) p.className='pin-handle '+d[i].pin;} } }); }catch(e){} }
-
-  /* ---------------------------
-    Weather & Brightness
-  --------------------------- */
-  const icons = { 0:'wb_sunny', 1:'wb_sunny', 2:'partly_cloudy_day', 3:'cloud', 45:'foggy', 51:'rainy', 61:'rainy', 63:'rainy', 71:'ac_unit', 80:'rainy', 95:'thunderstorm' };
-  async function updateWeather() {
-    try {
-      const r = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${state.userLat}&longitude=${state.userLon}&current_weather=true&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max&temperature_unit=fahrenheit&timezone=auto`);
-      const d = await r.json(); if(!d.current_weather) return;
-      const t = Math.round(d.current_weather.temperature), c = d.current_weather.weathercode, night = d.current_weather.is_day===0;
-      document.getElementById('temp').innerText = t + "°";
-      document.getElementById('condition').innerText = (night && c<=2) ? "Clear Night" : weatherLabel(c);
-      document.getElementById('weather-icon').innerText = (night && c<=2) ? 'bedtime' : (icons[c]||'cloud');
-      const hi = Math.round(d.daily.temperature_2m_max[0]), lo = Math.round(d.daily.temperature_2m_min[0]);
-      document.getElementById('weather-details').innerText = `High ${hi}° Low ${lo}°`;
-      document.getElementById('ticker-tape').innerText = `Today's Forecast: ${weatherLabel(c)} with a high of ${hi}°. Have a wonderful day!`;
-    } catch(e) {}
-  }
-  function weatherLabel(code) { const map = { 0:'Clear', 1:'Fair', 2:'Partly Cloudy', 3:'Cloudy', 45:'Fog', 51:'Drizzle', 61:'Rain', 71:'Snow', 95:'Storm' }; return map[code]||'Weather'; }
-
-  function checkBrightness() {
-    const h = new Date().getHours(), night = h >= 22 || h < 7;
-    document.body.style.filter = `brightness(${state.autoBright && night ? 0.4 : state.manualBright})`;
-  }
-
-  /* ---------------------------
-    Binding
-  --------------------------- */
-  function bindUI() {
-    const click = (id, fn) => document.getElementById(id).addEventListener('click', fn);
-    click('settings-btn', () => document.getElementById('settings-panel').classList.toggle('open'));
-    click('btn-close-settings', () => document.getElementById('settings-panel').classList.remove('open'));
-    click('time-widget', () => document.getElementById('settings-panel').classList.toggle('open'));
-    click('agenda-box', () => document.getElementById('calendar-modal').classList.toggle('show'));
-    click('btn-close-cal', () => document.getElementById('calendar-modal').classList.toggle('show'));
-    click('btn-upload', () => document.getElementById('fileInput').click());
-    click('btn-clear', clearMemory);
-    click('btn-layout', () => { state.layoutMode = (state.layoutMode === 1) ? 3 : 1; refreshAll(); document.getElementById('btn-layout').innerText="Layout: "+(state.layoutMode===1?"Single":"Corkboard"); });
-    click('btn-shuffle', () => { state.shuffleActive = !state.shuffleActive; document.getElementById('btn-shuffle').classList.toggle('btn-active'); });
-    click('btn-motion', () => { state.motionActive = !state.motionActive; document.getElementById('btn-motion').classList.toggle('btn-active'); refreshAll(); });
-    click('btn-auto-arrange', () => { state.autoArrangeActive = !state.autoArrangeActive; document.getElementById('btn-auto-arrange').classList.toggle('btn-active'); if(state.autoArrangeActive) applySmartLayout(); });
-    click('btn-rotate', () => { state.screenRotState = (state.screenRotState + 1) % 4; applyRot(); });
-    click('btn-fullscreen', () => { if(!document.fullscreenElement) document.documentElement.requestFullscreen(); else document.exitFullscreen(); });
-    click('btn-auto-bright', () => { state.autoBright = !state.autoBright; document.getElementById('btn-auto-bright').classList.toggle('btn-active'); checkBrightness(); });
-    
-    document.getElementById('brightness-slider').addEventListener('input', (e) => { state.manualBright = parseFloat(e.target.value); document.getElementById('bright-val').innerText = Math.round(state.manualBright*100)+'%'; checkBrightness(); });
-    document.getElementById('timer-select').addEventListener('change', (e) => updateTimer(e.target.value));
-    document.getElementById('fileInput').addEventListener('change', function() { if(this.files.length) saveFilesToDB(this.files); });
-    
-    document.querySelectorAll('.media-container').forEach(mc => { mc.addEventListener('click', () => { const n = parseInt(mc.dataset.box); if(!state.mediaItems.length) return; state.indices[n-1] = getNextIdx(state.indices[n-1]); renderBox(n, state.indices[n-1]); }); });
-  }
-
-  function applyRot() {
-    const c = document.getElementById('container'), d = state.screenRotState * 90, w = window.innerWidth, h = window.innerHeight;
-    c.style.transform = (d===0) ? 'none' : (d===180 ? 'rotate(180deg)' : `translate(${(w-h)/2}px, ${(h-w)/2}px) rotate(${d}deg)`);
-    setTimeout(applySmartLayout, 250);
-  }
-
-  let drag = { el:null, res:false, down:false, sx:0, sy:0, sw:0, st:0, sl:0 };
-  document.addEventListener('pointerdown', e => {
-    const p = e.target.closest('.pin-handle'), r = e.target.closest('.resize-handle');
-    if (state.layoutMode !== 3 || (!p && !r)) return;
-    drag.el = p ? p.parentElement : r.parentElement; drag.res = !!r; drag.down = true;
-    drag.sx = e.clientX; drag.sy = e.clientY; drag.sw = drag.el.offsetWidth; drag.st = drag.el.offsetTop; drag.sl = drag.el.offsetLeft;
-    drag.el.style.zIndex = 100;
-    if (state.autoArrangeActive) { state.autoArrangeActive=false; document.getElementById('btn-auto-arrange').classList.remove('btn-active'); }
-    e.preventDefault();
-  });
-  document.addEventListener('pointermove', e => {
-    if (!drag.down || !drag.el) return;
-    const dx = e.clientX - drag.sx, dy = e.clientY - drag.sy;
-    if (drag.res) { const nw = Math.max(150, drag.sw + dx); drag.el.style.width = nw + 'px'; const bn = parseInt(drag.el.querySelector('.media-container').dataset.box); drag.el.style.height = (nw * (state.loadedRatios[bn]||1) + 50) + 'px'; }
-    else { drag.el.style.left = (drag.sl + dx) + 'px'; drag.el.style.top = (drag.st + dy) + 'px'; }
-  });
-  document.addEventListener('pointerup', () => { if(drag.el){ drag.el.style.zIndex=''; saveCork(); } drag.el=null; drag.down=false; });
-
-  function tick() {
-    const n = new Date(), t = new Date(n); t.setDate(n.getDate()+1);
-    document.getElementById('time').innerText = n.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
-    document.getElementById('date-today').innerText = n.toLocaleDateString([], {weekday:'short', day:'numeric'});
-    document.getElementById('date-tmrw').innerText = t.toLocaleDateString([], {weekday:'short', day:'numeric'});
-    if(state.autoBright) checkBrightness();
-  }
-
-  initDB(); bindUI(); loadFromDB(); setInterval(tick, 1000); updateWeather(); setInterval(updateWeather, 900000); tick();
-</script>
-</body>
-</html>
-
-    .mode-1 .img-box { width: 100% !important; height: 100% !important; top: 0 !important; left: 0 !important; transform: none !important; border: none !important; padding: 0 !important; background: #000; }
-
-    /* MODE 3: Realistic Corkboard */
-    .mode-3 {
-      background-color: #8a6a4b;
-      background-image: 
-        radial-gradient(hsla(34, 40%, 25%, 0.3) 15%, transparent 16%), 
-        radial-gradient(hsla(34, 40%, 25%, 0.3) 15%, transparent 16%),
-        url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.15'/%3E%3C/svg%3E");
-      background-size: 20px 20px, 20px 20px, 200px 200px;
-      background-position: 0 0, 10px 10px, 0 0;
-    }
-    
-    .mode-3 .img-box {
-      background: #fdfdfd;
-      padding: 12px 12px 50px 12px;
-      border: none;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.05), 3px 8px 20px rgba(0,0,0,0.2);
-      background-image: linear-gradient(to bottom right, #fff 0%, #f9f9f9 100%);
-    }
-
-    /* 3D PINS */
-    .pin-handle {
-      position: absolute; top: -12px; left: 50%; width: 20px; height: 20px;
-      border-radius: 50%; transform: translateX(-50%);
-      z-index: 50; cursor: move; 
-      box-shadow: inset -3px -3px 5px rgba(0,0,0,0.3), inset 2px 2px 5px rgba(255,255,255,0.6), 2px 3px 5px rgba(0,0,0,0.3);
-      border: 1px solid rgba(0,0,0,0.1);
-    }
-    .mode-3 .pin-handle { display: block; }
-    
-    /* Pin Colors */
-    .pin-red { background-color: #ef4444; } .pin-blue { background-color: #3b82f6; }
-    .pin-green { background-color: #10b981; } .pin-yellow { background-color: #f59e0b; }
-    .pin-purple { background-color: #8b5cf6; }
-
-    .resize-handle { position: absolute; bottom: 0; left: 0; width: 100%; height: 50px; cursor: ns-resize; display: none; z-index: 40; }
-    .mode-3 .resize-handle { display: block; }
-
-    .media-container { width: 100%; height: 100%; overflow: hidden; position: relative; pointer-events: auto; cursor: pointer; box-shadow: inset 0 0 2px rgba(0,0,0,0.1); }
-    .mode-1 .media-container { cursor: default; }
-
-    .media-item { width: 100%; height: 100%; object-fit: contain; opacity: 0; transition: opacity 0.5s; pointer-events: none; }
-    .media-item.loaded { opacity: 1; }
-    .mode-3 .media-item { object-fit: cover; filter: sepia(0.05) contrast(1.05); }
-
-    /* KEN BURNS */
-    .ken-burns { animation: kenBurnsEffect 20s infinite alternate ease-in-out; }
-    @keyframes kenBurnsEffect { 0% { transform: scale(1.0); } 100% { transform: scale(1.15); } }
-
-    /* --- OVERLAY UI --- */
-    #overlay {
-      position: absolute; bottom: 0; left: 0; width: 100%; height: 100%; 
-      pointer-events: none; z-index: 100;
-    }
-    
-    #sticky-container {
-      position: absolute; bottom: 20px; left: 0; width: 100%;
-      padding: 0 20px; box-sizing: border-box;
-      display: flex; justify-content: space-between; align-items: flex-end;
-      gap: 15px; pointer-events: none;
-    }
-
-    /* Stickies */
-    .sticky-note {
-      position: relative; padding: 15px;
-      box-shadow: 2px 4px 10px rgba(0,0,0,0.2);
-      pointer-events: auto; cursor: pointer;
-      font-family: 'Kalam', cursive; color: #333;
-      transform-origin: center top; transition: transform 0.2s; min-width: 140px;
-    }
-    .sticky-note:active { transform: scale(0.98) !important; }
-    .sticky-note::after { content:''; position:absolute; top:-5px; left:50%; width:6px; height:6px; background:rgba(0,0,0,0.3); border-radius:50%; transform:translateX(-50%); z-index:55; }
-
-    #time-widget { background: var(--sticky-yellow); transform: rotate(-2deg); text-align: center; }
-    #time { font-size: 2.8rem; font-weight: 700; line-height: 0.9; color: #1f2937; }
-    
-    #agenda-box { background: var(--sticky-pink); transform: rotate(1.5deg); display: flex; gap: 15px; text-align: center; }
-    .day-col { display: flex; flex-direction: column; }
-    .day-label { font-size: 0.8rem; text-transform: uppercase; color: #666; font-weight: 700; }
-    .day-date { font-size: 1.4rem; font-weight: 700; line-height: 1; }
-    
-    #weather-box { background: var(--sticky-blue); transform: rotate(-1deg); text-align: right; display: flex; flex-direction: column; align-items: flex-end; }
-    #weather-main { display: flex; align-items: center; gap: 5px; }
-    #weather-icon { font-size: 32px; color: #2563eb; }
-    #temp { font-size: 2.2rem; font-weight: 700; line-height: 1; }
-    #condition { font-size: 0.9rem; font-weight: 600; text-transform: capitalize; }
-    #weather-details { font-size: 0.75rem; color: #555; margin-top: 4px; font-family: 'Inter', sans-serif; line-height: 1.2; text-align: right; max-width: 160px; }
-
-    #ticker-tape {
-      position: absolute; bottom: 80px; left: 50%; transform: translateX(-50%) rotate(0.5deg);
-      background: rgba(255,255,255,0.85);
-      border-left: 2px solid rgba(0,0,0,0.1); border-right: 2px solid rgba(0,0,0,0.1);
-      padding: 5px 40px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-      font-family: 'Permanent Marker', cursive; font-size: 1rem; color: #444;
-      pointer-events: none; white-space: nowrap; z-index: 90;
-      mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
-      -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
-    }
-
-    .widget-pin {
-      position: absolute; top: -8px; left: 50%; transform: translateX(-50%);
-      width: 14px; height: 14px; border-radius: 50%;
-      box-shadow: inset -2px -2px 4px rgba(0,0,0,0.2), 1px 2px 3px rgba(0,0,0,0.3);
-      z-index: 60; border: 1px solid rgba(0,0,0,0.1);
-    }
-    .wp-red { background: #ef4444; } .wp-green { background: #10b981; } .wp-blue { background: #3b82f6; }
-
-    /* --- FULL CALENDAR IFRAME --- */
-    #calendar-modal {
-      position: absolute; bottom: -100%; left: 0; width: 100%; height: 95%;
-      background: #fff; transition: bottom 0.4s cubic-bezier(0.19, 1, 0.22, 1);
-      z-index: 160; border-top-left-radius: 24px; border-top-right-radius: 24px;
-      overflow: hidden; box-shadow: 0 -10px 50px rgba(0,0,0,0.5);
-    }
-    #calendar-modal.show { bottom: 0; }
-    .cal-header {
-      height: 60px; display: flex; justify-content: space-between; align-items: center;
-      padding: 0 25px; border-bottom: 1px solid #eee;
-      color: #333; font-weight: 700; font-size: 18px; 
-    }
-    .close-cal { cursor: pointer; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; background: #f3f4f6; border-radius: 50%; font-size: 18px; }
-
-    /* --- SETTINGS --- */
-    #settings-btn {
-      position: absolute; top: 30px; right: 30px; z-index: 250;
-      width: 48px; height: 48px; 
-      background: rgba(255,255,255,0.9); backdrop-filter: blur(10px);
-      border: 1px solid rgba(0,0,0,0.1); border-radius: 50%;
-      color: #333; display: flex; align-items: center; justify-content: center;
-      font-size: 24px; cursor: pointer; pointer-events: auto;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1); transition: transform 0.2s;
-    }
-    #settings-btn:active { transform: scale(0.9); }
-    
-    #settings-panel {
-      position: absolute; top: 0; right: -360px; width: 340px; height: 100%;
-      background: #111; color: #eee;
-      z-index: 200; transition: right 0.3s cubic-bezier(0.19, 1, 0.22, 1);
-      padding: 25px; box-sizing: border-box; border-left: 1px solid #333;
-      overflow-y: auto;
-    }
-    #settings-panel.open { right: 0; }
-    
-    .settings-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; padding-bottom: 15px; border-bottom: 1px solid #333; }
-    .settings-title { font-family: 'Permanent Marker', cursive; font-size: 1.5rem; color: #fff; }
-    .close-settings { cursor: pointer; width: 36px; height: 36px; background: #333; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; color: #fff; transition: background 0.2s; }
-    .close-settings:hover { background: #444; }
-    
-    .setting-group { margin-bottom: 25px; padding-bottom: 20px; border-bottom: 1px solid #222; }
-    .setting-label { font-size: 0.8rem; color: #888; margin-bottom: 10px; display: block; text-transform: uppercase; letter-spacing: 1.5px; }
-    
-    .pro-btn {
-      display: block; width: 100%; padding: 14px; margin-bottom: 10px;
-      background: #252525; border: 1px solid #333; color: #eee; border-radius: 12px; 
-      text-align: left; cursor: pointer; font-weight: 500;
-      transition: all 0.2s;
-    }
-    .pro-btn:active { transform: scale(0.98); background: #333; }
-    .btn-primary { background: var(--accent-color); border: none; color: white; }
-    .btn-active { border: 1px solid var(--accent-color); color: var(--accent-color); background: rgba(59, 130, 246, 0.1); }
-    .pro-select { width: 100%; padding: 14px; background: #252525; border: 1px solid #333; color: white; border-radius: 12px; font-size: 1rem; outline: none; margin-bottom: 12px; }
-    input[type=range] { width: 100%; margin: 10px 0; accent-color: var(--accent-color); }
-    #storage-status { font-size: 0.7rem; color: #888; margin-bottom: 10px; }
-
-  </style>
-</head>
-
-<body>
-  <input type="file" id="fileInput" webkitdirectory directory multiple style="display:none" />
-  <video id="wake-video" loop playsinline muted style="display:none"><source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4" /></video>
-
-  <div id="container">
-    <div id="settings-btn"><span class="material-symbols-rounded">settings</span></div>
-
-    <div id="settings-panel">
-      <div class="settings-header">
-          <div class="settings-title">Settings</div>
-          <div class="close-settings" id="btn-close-settings">✕</div>
-      </div>
-
-      <div class="setting-group">
-        <span class="setting-label">Display</span>
-        <label style="font-size:0.9rem; color:#ccc; display:flex; justify-content:space-between;">
-          Brightness <span id="bright-val">100%</span>
-        </label>
-        <input type="range" id="brightness-slider" min="0.2" max="1" step="0.1" value="1">
-        <button id="btn-auto-bright" class="pro-btn">Auto-Dim (Night): OFF</button>
-      </div>
-
-      <div class="setting-group">
-        <span class="setting-label">Media Source</span>
-        <button class="pro-btn btn-primary" id="btn-upload">+ Load Folder</button>
-        <div id="storage-status">Checking memory...</div>
-        <button class="pro-btn" id="btn-clear" style="background:#332222; color:#ff8888; font-size:0.8rem;">Clear Memory</button>
-      </div>
-
-      <div class="setting-group">
-        <span class="setting-label">Configuration</span>
-        <select id="timer-select" class="pro-select">
-          <option value="60000">1 Minute</option>
-          <option value="300000">5 Minutes</option>
-          <option value="600000">10 Minutes</option>
-          <option value="900000">15 Minutes</option>
-          <option value="1800000">30 Minutes</option>
-          <option value="2700000">45 Minutes</option>
-          <option value="3600000" selected>1 Hour</option>
-          <option value="10800000">3 Hours</option>
-          <option value="18000000">5 Hours</option>
-          <option value="static">Static</option>
-        </select>
-        
-        <button id="btn-rotate" class="pro-btn">Rotate Canvas (⟳)</button>
-        <button id="btn-layout" class="pro-btn">Layout: Single</button>
-        <button id="btn-auto-arrange" class="pro-btn">Auto-Arrange: OFF</button>
-        <button id="btn-shuffle" class="pro-btn">Shuffle: OFF</button>
-        <button id="btn-motion" class="pro-btn">Motion: OFF</button>
-        <button id="btn-fullscreen" class="pro-btn">Full Screen</button>
-        <button id="reset-btn" class="pro-btn" style="display:none;">Reset Pins</button>
-      </div>
-    </div>
-
-    <!-- Media Layer -->
-    <div id="photo-wrapper" class="mode-1">
-      <div id="box-1" class="img-box" style="top:10%; left:10%; width:280px;">
-        <div class="pin-handle"></div>
-        <div class="media-container" data-box="1"></div>
-        <div class="resize-handle"></div>
-      </div>
-      <div id="box-2" class="img-box" style="top:15%; left:50%; width:280px; display:none;">
-        <div class="pin-handle"></div>
-        <div class="media-container" data-box="2"></div>
-        <div class="resize-handle"></div>
-      </div>
-      <div id="box-3" class="img-box" style="top:50%; left:30%; width:280px; display:none;">
-        <div class="pin-handle"></div>
-        <div class="media-container" data-box="3"></div>
-        <div class="resize-handle"></div>
-      </div>
-    </div>
-
-    <!-- Sticky UI Layer -->
-    <div id="overlay">
-      <div id="ticker-tape">Loading Forecast...</div>
-      
-      <div id="sticky-container">
-        <!-- Time Note -->
-        <div id="time-widget" class="sticky-note">
-          <div class="widget-pin wp-red"></div>
-          <div id="time">00:00</div>
-        </div>
-
-        <!-- Agenda Note -->
-        <div id="agenda-box" class="sticky-note">
-          <div class="widget-pin wp-green"></div>
-          <div class="day-col">
-            <span class="day-label">Today</span>
-            <span class="day-date" id="date-today">--</span>
-          </div>
-          <div style="width:1px; background:#999;"></div>
-          <div class="day-col">
-            <span class="day-label">Tomrw</span>
-            <span class="day-date" id="date-tmrw">--</span>
-          </div>
-        </div>
-
-        <!-- Weather Note -->
         <div id="weather-box" class="sticky-note">
           <div class="widget-pin wp-blue"></div>
           <div id="weather-main">
@@ -819,640 +660,8 @@
             <span class="material-symbols-rounded" id="weather-icon">wb_sunny</span>
           </div>
           <div id="condition">Loading</div>
-          <div id="weather-details">High --° Low --°</div>
-        </div>
-      </div>
-    </div>
-
-    <div id="calendar-modal">
-      <div class="cal-header">
-        <span>Calendar</span>
-        <div class="close-cal" id="btn-close-cal">✕</div>
-      </div>
-      <iframe
-        src="https://calendar.google.com/calendar/embed?src=runner4evs%40gmail.com&ctz=America%2FDenver&mode=MONTH&showTitle=0&showNav=1&showDate=1&showPrint=0&showTabs=0&showCalendars=0&bgcolor=%23ffffff"
-        style="border:0; width:100%; height:100%;" frameborder="0" scrolling="no">
-      </iframe>
-    </div>
-  </div>
-
-<script>
-  /* ---------------------------
-    State & DB
-  --------------------------- */
-  const state = {
-    mediaItems: [], indices: [0, 1, 2], layoutMode: 1,
-    shuffleActive: false, motionActive: false, autoArrangeActive: false,
-    screenRotState: 0, userLat: 40.3769, userLon: -111.7958,
-    slideDuration: 3600000, timers: [null, null, null], timeouts: [null, null, null],
-    loadedRatios: { 1: 1, 2: 1, 3: 1 }, currentObjectUrls: { 1: null, 2: null, 3: null },
-    rafId: null, pinColors: ['pin-red', 'pin-blue', 'pin-green', 'pin-yellow', 'pin-purple'],
-    autoBright: false, manualBright: 1
-  };
-
-  const DB_NAME='FrameDB', STORE_NAME='mediaStore';
-  function initDB() { return new Promise((res, rej) => { const r = indexedDB.open(DB_NAME, 2); r.onerror=()=>rej(); r.onupgradeneeded=e=>{ const db=e.target.result; if(!db.objectStoreNames.contains(STORE_NAME)) db.createObjectStore(STORE_NAME, { keyPath:'id' }); }; r.onsuccess=e=>res(e.target.result); }); }
-  function makeFileId(f) { return `${f.webkitRelativePath||f.name}::${f.size}::${f.lastModified}`; }
-
-  async function saveFilesToDB(files) {
-    const status = document.getElementById('storage-status');
-    status.innerText = "Initializing...";
-    const db = await initDB();
-    const validFiles = Array.from(files).filter(f => f.type.match(/^(image|video)/));
-    const total = validFiles.length;
-    let processed = 0;
-    const CHUNK_SIZE = 50;
-    
-    const processChunk = async (startIndex) => {
-      if (startIndex >= total) { status.innerText = `${total} saved.`; loadFromDB(); return; }
-      const tx = db.transaction(STORE_NAME, 'readwrite');
-      const store = tx.objectStore(STORE_NAME);
-      const endIndex = Math.min(startIndex + CHUNK_SIZE, total);
-      for (let i = startIndex; i < endIndex; i++) {
-        const f = validFiles[i];
-        store.put({ id: makeFileId(f), type: f.type.startsWith('video')?'video':'image', file: f });
-      }
-      tx.oncomplete = () => { processed = endIndex; status.innerText = `Saving ${processed}/${total}...`; setTimeout(() => processChunk(endIndex), 10); };
-      tx.onerror = () => { status.innerText = "Error."; };
-    };
-    processChunk(0);
-  }
-
-  async function loadFromDB() {
-    try {
-      const db = await initDB(), tx = db.transaction(STORE_NAME, 'readonly'), req = tx.objectStore(STORE_NAME).getAll();
-      req.onsuccess = () => {
-        state.mediaItems = (req.result || []).map(r => ({ id:r.id, type:r.type, file:r.file }));
-        document.getElementById('storage-status').innerText = state.mediaItems.length ? `${state.mediaItems.length} Loaded.` : "Empty.";
-        refreshAll();
-      };
-    } catch (e) { document.getElementById('storage-status').innerText = "DB Error"; }
-  }
-
-  async function clearMemory() {
-    const db = await initDB(), tx = db.transaction(STORE_NAME, 'readwrite'); tx.objectStore(STORE_NAME).clear();
-    tx.oncomplete = () => { [1,2,3].forEach(revokeBoxUrl); state.mediaItems = []; refreshAll(); document.getElementById('storage-status').innerText = "Cleared."; };
-  }
-
-  /* ---------------------------
-    Helpers
-  --------------------------- */
-  function revokeBoxUrl(n) { if (state.currentObjectUrls[n]) { URL.revokeObjectURL(state.currentObjectUrls[n]); state.currentObjectUrls[n] = null; } }
-  function getItemUrl(n, item) { revokeBoxUrl(n); const u = URL.createObjectURL(item.file); state.currentObjectUrls[n] = u; return u; }
-  function getNextIdx(curr) {
-    const L = state.mediaItems.length; if (!L) return 0;
-    if (state.shuffleActive) { if (L===1) return 0; let next; do { next=Math.floor(Math.random()*L); } while (next===curr); return next; }
-    return (curr + 1) % L;
-  }
-
-  function renderBox(n, idx) {
-    const box = document.getElementById('box-'+n), con = box.querySelector('.media-container'); con.innerHTML = '';
-    if (!state.mediaItems || !state.mediaItems.length) return;
-    if (!state.mediaItems[idx]) idx = 0;
-    const item = state.mediaItems[idx], el = document.createElement(item.type==='video'?'video':'img');
-    el.className = 'media-item';
-    if (state.motionActive && item.type==='image' && !document.hidden) el.classList.add('ken-burns');
-
-    const pin = box.querySelector('.pin-handle');
-    if (pin) {
-      let savedColor = null;
-      try { const d = JSON.parse(localStorage.getItem('cork_layout')); if (d && d[n] && d[n].pin) savedColor = d[n].pin; } catch(e){}
-      if (!savedColor) savedColor = state.pinColors[Math.floor(Math.random()*state.pinColors.length)];
-      pin.className = 'pin-handle ' + savedColor;
-      if(state.layoutMode === 3) saveCork(); 
-    }
-
-    const onLoad = () => {
-      el.classList.add('loaded');
-      const r = item.type==='video' ? (el.videoWidth ? el.videoHeight/el.videoWidth : 1) : (el.naturalWidth ? el.naturalHeight/el.naturalWidth : 1);
-      state.loadedRatios[n] = r || 1;
-      if (state.layoutMode === 3) {
-        if (state.autoArrangeActive) applySmartLayout();
-        else { const w = parseInt(box.style.width)||280; box.style.height = (w*(r||1)+50)+'px'; }
-        saveCork();
-      }
-    };
-    if (item.type==='video') { el.loop=true; el.muted=true; el.autoplay=true; el.playsInline=true; el.oncanplay=onLoad; } else el.onload=onLoad;
-    el.src = getItemUrl(n, item); con.appendChild(el);
-  }
-
-  function refreshAll() {
-    document.getElementById('photo-wrapper').className = 'mode-' + state.layoutMode;
-    document.getElementById('reset-btn').style.display = (state.layoutMode === 3) ? 'block' : 'none';
-    
-    // Toggle Sticky Visibility
-    const sticky = document.getElementById('sticky-container');
-    const ticker = document.getElementById('ticker-tape');
-    if(state.layoutMode === 1) { sticky.style.opacity = '0'; ticker.style.opacity = '0'; }
-    else { sticky.style.opacity = '1'; ticker.style.opacity = '1'; }
-
-    renderBox(1, state.indices[0]);
-    const b2=document.getElementById('box-2'), b3=document.getElementById('box-3');
-    // Simplified Mode Logic: 1 = Single, 3 = Corkboard.
-    if (state.layoutMode === 3) { 
-        b2.style.display='flex'; renderBox(2, state.indices[1]); 
-        b3.style.display='flex'; renderBox(3, state.indices[2]); loadCork(); 
-    } else { 
-        b2.style.display='none'; revokeBoxUrl(2); 
-        b3.style.display='none'; revokeBoxUrl(3); 
-    }
-    updateTimer(document.getElementById('timer-select').value);
-  }
-
-  function updateTimer(val) {
-    state.timers.forEach(t => t && clearInterval(t)); state.timeouts.forEach(t => t && clearTimeout(t));
-    state.timers = [null,null,null]; state.timeouts = [null,null,null];
-    if (val === 'static') return;
-    const dur = parseInt(val, 10);
-    const tick = (n, i) => { if (state.mediaItems.length) { state.indices[i] = getNextIdx(state.indices[i]); renderBox(n, state.indices[i]); } };
-    state.timers[0] = setInterval(() => tick(1,0), dur);
-    if (state.layoutMode === 3) {
-        state.timeouts[1] = setTimeout(() => { tick(2,1); state.timers[1] = setInterval(() => tick(2,1), dur); }, dur/3);
-        state.timeouts[2] = setTimeout(() => { tick(3,2); state.timers[2] = setInterval(() => tick(3,2), dur); }, (dur/3)*2);
-    }
-  }
-
-  /* ---------------------------
-    Weather Logic
-  --------------------------- */
-  const icons = { 0:'wb_sunny', 1:'wb_sunny', 2:'partly_cloudy_day', 3:'cloud', 45:'foggy', 51:'rainy', 61:'rainy', 63:'rainy', 71:'ac_unit', 80:'rainy', 95:'thunderstorm' };
-  function weatherLabel(code) { const map = { 0:'Clear', 1:'Fair', 2:'Partly Cloudy', 3:'Cloudy', 45:'Fog', 51:'Drizzle', 61:'Rain', 71:'Snow', 95:'Storm' }; return map[code]||'Weather'; }
-
-  async function updateWeather() {
-    try {
-      const r = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${state.userLat}&longitude=${state.userLon}&current_weather=true&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max&temperature_unit=fahrenheit&timezone=auto`);
-      const d = await r.json(); if(!d.current_weather) return;
-      const t = Math.round(d.current_weather.temperature), c = d.current_weather.weathercode, night = d.current_weather.is_day===0;
-      
-      document.getElementById('temp').innerText = t + "°";
-      document.getElementById('condition').innerText = (night && c<=2) ? "Clear Night" : weatherLabel(c);
-      document.getElementById('weather-icon').innerText = (night && c<=2) ? 'bedtime' : (icons[c]||'cloud');
-      
-      const hi = Math.round(d.daily.temperature_2m_max[0]), lo = Math.round(d.daily.temperature_2m_min[0]), precip = d.daily.precipitation_probability_max[0];
-      document.getElementById('weather-details').innerText = `High ${hi}° Low ${lo}°`;
-      
-      const msg = `Today: ${hi}°/${lo}°. ` + (precip > 30 ? `Precipitation: ${precip}%.` : `Enjoy the view.`);
-      document.getElementById('ticker-tape').innerText = msg;
-    } catch(e) {}
-  }
-
-  function checkBrightness() {
-    const h = new Date().getHours(), night = h >= 22 || h < 7;
-    document.body.style.filter = `brightness(${state.autoBright && night ? 0.4 : state.manualBright})`;
-  }
-
-  /* ---------------------------
-    UI Binding
-  --------------------------- */
-  function bindUI() {
-    const click = (id, fn) => document.getElementById(id).addEventListener('click', fn);
-    click('settings-btn', () => document.getElementById('settings-panel').classList.toggle('open'));
-    click('btn-close-settings', () => document.getElementById('settings-panel').classList.remove('open'));
-    
-    click('time-widget', () => document.getElementById('settings-panel').classList.toggle('open'));
-    click('agenda-box', () => document.getElementById('calendar-modal').classList.toggle('show'));
-    click('btn-close-cal', () => document.getElementById('calendar-modal').classList.toggle('show'));
-    click('btn-upload', () => document.getElementById('fileInput').click());
-    click('btn-clear', clearMemory);
-    click('btn-layout', () => { state.layoutMode = (state.layoutMode === 1) ? 3 : 1; refreshAll(); document.getElementById('btn-layout').innerText="Layout: "+(state.layoutMode===1?"Single":"Corkboard"); });
-    click('btn-shuffle', () => { state.shuffleActive = !state.shuffleActive; document.getElementById('btn-shuffle').classList.toggle('btn-active'); });
-    click('btn-motion', () => { state.motionActive = !state.motionActive; document.getElementById('btn-motion').classList.toggle('btn-active'); refreshAll(); });
-    click('btn-auto-arrange', () => { state.autoArrangeActive = !state.autoArrangeActive; document.getElementById('btn-auto-arrange').classList.toggle('btn-active'); if(state.autoArrangeActive) applySmartLayout(); });
-    click('btn-rotate', () => { state.screenRotState = (state.screenRotState + 1) % 4; applyRot(); });
-    click('btn-fullscreen', () => { if(!document.fullscreenElement) document.documentElement.requestFullscreen(); else document.exitFullscreen(); });
-    click('reset-btn', () => { localStorage.removeItem('cork_layout'); refreshAll(); });
-    click('btn-auto-bright', () => { state.autoBright = !state.autoBright; document.getElementById('btn-auto-bright').classList.toggle('btn-active'); checkBrightness(); });
-    
-    document.getElementById('brightness-slider').addEventListener('input', (e) => { state.manualBright = parseFloat(e.target.value); document.getElementById('bright-val').innerText = Math.round(state.manualBright*100)+'%'; checkBrightness(); });
-    document.getElementById('timer-select').addEventListener('change', (e) => updateTimer(e.target.value));
-    document.getElementById('fileInput').addEventListener('change', function() { if(this.files.length) saveFilesToDB(this.files); });
-    
-    document.querySelectorAll('.media-container').forEach(mc => { mc.addEventListener('click', () => { const n = parseInt(mc.dataset.box); if(!state.mediaItems.length) return; state.indices[n-1] = getNextIdx(state.indices[n-1]); renderBox(n, state.indices[n-1]); }); });
-  }
-
-  function applyRot() {
-    const c = document.getElementById('container'), d = state.screenRotState * 90, w = window.innerWidth, h = window.innerHeight;
-    c.style.transform = (d===0) ? 'none' : (d===180 ? 'rotate(180deg)' : `translate(${(w-h)/2}px, ${(h-w)/2}px) rotate(${d}deg)`);
-    setTimeout(applySmartLayout, 200);
-  }
-
-  /* ---------------------------
-    Smart Layout (Lifted Higher)
-  --------------------------- */
-  function applySmartLayout() {
-    if (state.layoutMode !== 3 || !state.autoArrangeActive) return;
-    const w = window.innerWidth, H = window.innerHeight;
-    
-    // Reserve space for sticky notes (approx 190px from bottom)
-    const topPad = 20;
-    const bottomPad = 200; 
-    const usableH = Math.max(200, H - topPad - bottomPad);
-
-    const ratios = { 1: state.loadedRatios[1]||1, 2: state.loadedRatios[2]||1, 3: state.loadedRatios[3]||1 };
-    const rList = [ratios[1], ratios[2], ratios[3]];
-    const portraits = rList.filter(r => r >= 1.05).length;
-
-    // Helper: calculate max width that fits inside usable height
-    const maxWidthThatFits = (r) => Math.floor((usableH - 50) / Math.max(0.6, r));
-
-    const setBox = (i, x, y, w) => {
-      const b = document.getElementById('box-'+i);
-      const r = ratios[i];
-      const h = (w * r + 50);
-      b.style.width = w + 'px'; b.style.height = h + 'px';
-      b.style.left = x + 'px'; b.style.top = y + 'px';
-      b.style.transform = `rotate(${(Math.random()*6-3).toFixed(1)}deg)`;
-    };
-
-    if (portraits >= 2) {
-      // 3-Across
-      const gap = 18;
-      const colW = Math.max(180, Math.min(Math.floor((w - gap * 4) / 3), maxWidthThatFits(Math.max(...rList))));
-      const heights = [1,2,3].map(i => colW * ratios[i] + 50);
-      const rowTop = topPad + Math.max(0, Math.floor((usableH - Math.max(...heights)) * 0.15));
-      setBox(1, gap, rowTop, colW);
-      setBox(2, gap * 2 + colW, rowTop, colW);
-      setBox(3, gap * 3 + colW * 2, rowTop, colW);
-    } else {
-      // Pyramid (Center Tall)
-      const ids = [1,2,3].sort((a,b) => (ratios[b]||1) - (ratios[a]||1));
-      const [cId, sA, sB] = ids;
-      const cW = Math.max(210, Math.min(Math.floor(w * 0.46), maxWidthThatFits(ratios[cId])));
-      const sW = Math.max(180, Math.min(Math.floor(w * 0.26), Math.min(maxWidthThatFits(ratios[sA]), maxWidthThatFits(ratios[sB]))));
-      
-      const cH = cW * ratios[cId] + 50;
-      const cTop = topPad + Math.max(0, Math.floor((usableH - cH) * 0.1));
-      const sTop = topPad + Math.max(0, Math.floor((usableH - Math.max(sW*ratios[sA], sW*ratios[sB])) * 0.06));
-      
-      setBox(cId, Math.floor((w - cW) / 2), cTop, cW);
-      setBox(sA, 14, sTop, sW);
-      setBox(sB, w - sW - 14, sTop, sW);
-    }
-    saveCork();
-  }
-
-  function saveCork() { if (state.layoutMode!==3) return; const d={}; [1,2,3].forEach(i=>{ const b=document.getElementById('box-'+i), p=b.querySelector('.pin-handle'); let c=''; if(p) state.pinColors.forEach(pc=>{if(p.classList.contains(pc))c=pc;}); d[i]={t:b.style.top, l:b.style.left, w:b.style.width, h:b.style.height, r:b.style.transform, pin:c}; }); localStorage.setItem('cork_layout', JSON.stringify(d)); }
-  function loadCork() { try{ const d=JSON.parse(localStorage.getItem('cork_layout')); if(d) [1,2,3].forEach(i=>{ if(d[i]){ const b=document.getElementById('box-'+i); b.style.top=d[i].t; b.style.left=d[i].l; b.style.width=d[i].w; b.style.height=d[i].h; b.style.transform=d[i].r; if(d[i].pin){const p=b.querySelector('.pin-handle'); if(p) p.className='pin-handle '+d[i].pin;} } }); }catch(e){} }
-
-  let drag = { el:null, res:false, down:false, sx:0, sy:0, sw:0, st:0, sl:0 };
-  document.addEventListener('pointerdown', e => {
-    const p = e.target.closest('.pin-handle'), r = e.target.closest('.resize-handle');
-    if (state.layoutMode !== 3 || (!p && !r)) return;
-    drag.el = p ? p.parentElement : r.parentElement; drag.res = !!r; drag.down = true;
-    drag.sx = e.clientX; drag.sy = e.clientY; drag.sw = drag.el.offsetWidth; drag.st = drag.el.offsetTop; drag.sl = drag.el.offsetLeft;
-    drag.el.style.zIndex = 1000;
-    if (state.autoArrangeActive) { state.autoArrangeActive=false; document.getElementById('btn-auto-arrange').classList.remove('btn-active'); }
-    e.preventDefault();
-  });
-  document.addEventListener('pointermove', e => {
-    if (!drag.down || !drag.el) return;
-    const dx = e.clientX - drag.sx, dy = e.clientY - drag.sy;
-    if (drag.res) { const nw = Math.max(150, drag.sw + dx); drag.el.style.width = nw + 'px'; const bn = parseInt(drag.el.querySelector('.media-container').dataset.box); drag.el.style.height = (nw * (state.loadedRatios[bn]||1) + 50) + 'px'; }
-    else { drag.el.style.left = (drag.sl + dx) + 'px'; drag.el.style.top = (drag.st + dy) + 'px'; }
-  });
-  document.addEventListener('pointerup', () => { if(drag.el){ drag.el.style.zIndex=''; saveCork(); } drag.el=null; drag.down=false; });
-
-  function tick() {
-    const n = new Date(), t = new Date(n); t.setDate(n.getDate()+1);
-    document.getElementById('time').innerText = n.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
-    document.getElementById('date-today').innerText = n.toLocaleDateString([], {weekday:'short', day:'numeric'});
-    document.getElementById('date-tmrw').innerText = t.toLocaleDateString([], {weekday:'short', day:'numeric'});
-    if(state.autoBright) checkBrightness();
-  }
-
-  initDB(); bindUI(); loadFromDB(); setInterval(tick, 1000); updateWeather(); setInterval(updateWeather, 900000); tick();
-</script>
-</body>
-</html>
-
-
-    /* MODE 1: Single */
-    .mode-1 .img-box { width: 100% !important; height: 100% !important; top: 0 !important; left: 0 !important; transform: none !important; border: none !important; padding: 0 !important; background: #000; }
-
-    /* MODE 2: Staggered */
-    .mode-2 .img-box { width: 80%; height: 70%; background: #111; border: 4px solid #222; box-shadow: 0 10px 40px rgba(0,0,0,0.6); }
-    .mode-2 #box-1 { top: 15%; left: 10%; z-index: 2; transform: rotate(-2deg); }
-    .mode-2 #box-2 { top: 20%; left: 15%; z-index: 1; transform: rotate(3deg); opacity: 0.8; }
-
-    /* MODE 3: Realistic Corkboard */
-    .mode-3 {
-      background-color: #8a6a4b;
-      background-image: 
-        radial-gradient(hsla(34, 40%, 25%, 0.3) 15%, transparent 16%), 
-        radial-gradient(hsla(34, 40%, 25%, 0.3) 15%, transparent 16%),
-        url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.15'/%3E%3C/svg%3E");
-      background-size: 20px 20px, 20px 20px, 200px 200px;
-      background-position: 0 0, 10px 10px, 0 0;
-    }
-    
-    .mode-3 .img-box {
-      background: #fdfdfd;
-      padding: 12px 12px 50px 12px;
-      border: none;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.05), 3px 8px 20px rgba(0,0,0,0.2);
-      background-image: linear-gradient(to bottom right, #fff 0%, #f9f9f9 100%);
-    }
-
-    /* 3D PINS (Shared for Photos & Sticky Notes) */
-    .pin-handle {
-      position: absolute; top: -12px; left: 50%; width: 20px; height: 20px;
-      border-radius: 50%; transform: translateX(-50%);
-      z-index: 50; cursor: move; 
-      box-shadow: inset -3px -3px 5px rgba(0,0,0,0.3), inset 2px 2px 5px rgba(255,255,255,0.6), 2px 3px 5px rgba(0,0,0,0.3);
-      border: 1px solid rgba(0,0,0,0.1);
-    }
-    .mode-3 .pin-handle { display: block; }
-    
-    /* Pin Colors */
-    .pin-red { background-color: #ef4444; } .pin-blue { background-color: #3b82f6; }
-    .pin-green { background-color: #10b981; } .pin-yellow { background-color: #f59e0b; }
-    .pin-purple { background-color: #8b5cf6; }
-
-    .resize-handle { position: absolute; bottom: 0; left: 0; width: 100%; height: 50px; cursor: ns-resize; display: none; z-index: 40; }
-    .mode-3 .resize-handle { display: block; }
-
-    .media-container { width: 100%; height: 100%; overflow: hidden; position: relative; pointer-events: auto; cursor: pointer; box-shadow: inset 0 0 2px rgba(0,0,0,0.1); }
-    .mode-1 .media-container { cursor: default; }
-
-    .media-item { width: 100%; height: 100%; object-fit: contain; opacity: 0; transition: opacity 0.5s; pointer-events: none; }
-    .media-item.loaded { opacity: 1; }
-    .mode-3 .media-item { object-fit: cover; filter: sepia(0.05) contrast(1.05); }
-
-    /* KEN BURNS */
-    .ken-burns { animation: kenBurnsEffect 20s infinite alternate ease-in-out; }
-    @keyframes kenBurnsEffect { 0% { transform: scale(1.0); } 100% { transform: scale(1.15); } }
-
-    /* --- STICKY NOTE UI (Replaces Overlay) --- */
-    #overlay {
-      position: absolute; bottom: 0; left: 0; width: 100%; height: 100%; 
-      pointer-events: none; z-index: 100;
-    }
-    
-    #sticky-container {
-      position: absolute; bottom: 20px; left: 0; width: 100%;
-      padding: 0 20px; box-sizing: border-box;
-      display: flex; justify-content: space-between; align-items: flex-end;
-      gap: 15px; pointer-events: none;
-    }
-
-    /* Common Sticky Note Style */
-    .sticky-note {
-      position: relative;
-      padding: 15px;
-      box-shadow: 2px 4px 10px rgba(0,0,0,0.2);
-      pointer-events: auto; cursor: pointer;
-      font-family: 'Kalam', cursive;
-      color: #333;
-      transform-origin: center top;
-      transition: transform 0.2s;
-      min-width: 140px;
-    }
-    .sticky-note:active { transform: scale(0.98) !important; }
-    .sticky-note::after { /* Pin Shadow */ content:''; position:absolute; top:-5px; left:50%; width:6px; height:6px; background:rgba(0,0,0,0.3); border-radius:50%; transform:translateX(-50%); z-index:55; }
-
-    /* Specific Stickies */
-    #time-widget { 
-      background: var(--sticky-yellow); 
-      transform: rotate(-2deg); 
-      text-align: center;
-    }
-    #time { font-size: 2.8rem; font-weight: 700; line-height: 0.9; color: #1f2937; }
-    
-    #agenda-box { 
-      background: var(--sticky-pink); 
-      transform: rotate(1.5deg); 
-      display: flex; gap: 15px; text-align: center;
-    }
-    .day-col { display: flex; flex-direction: column; }
-    .day-label { font-size: 0.8rem; text-transform: uppercase; color: #666; font-weight: 700; }
-    .day-date { font-size: 1.4rem; font-weight: 700; line-height: 1; }
-    
-    #weather-box { 
-      background: var(--sticky-blue); 
-      transform: rotate(-1deg); 
-      text-align: right;
-      display: flex; flex-direction: column; align-items: flex-end;
-    }
-    #weather-main { display: flex; align-items: center; gap: 5px; }
-    #weather-icon { font-size: 32px; color: #2563eb; }
-    #temp { font-size: 2.2rem; font-weight: 700; line-height: 1; }
-    #condition { font-size: 0.9rem; font-weight: 600; text-transform: capitalize; }
-    #weather-details { font-size: 0.75rem; color: #555; margin-top: 4px; font-family: 'Inter', sans-serif; line-height: 1.2; text-align: right; max-width: 160px; }
-
-    /* The Tape Ticker */
-    #ticker-tape {
-      position: absolute; bottom: 80px; left: 50%; transform: translateX(-50%) rotate(0.5deg);
-      background: rgba(255,255,255,0.85);
-      border-left: 2px solid rgba(0,0,0,0.1); border-right: 2px solid rgba(0,0,0,0.1);
-      padding: 5px 40px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-      font-family: 'Permanent Marker', cursive;
-      font-size: 1rem; color: #444;
-      pointer-events: none;
-      white-space: nowrap;
-      z-index: 90;
-      mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
-      -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
-    }
-
-    /* Widget Pins */
-    .widget-pin {
-      position: absolute; top: -8px; left: 50%; transform: translateX(-50%);
-      width: 14px; height: 14px; border-radius: 50%;
-      box-shadow: inset -2px -2px 4px rgba(0,0,0,0.2), 1px 2px 3px rgba(0,0,0,0.3);
-      z-index: 60; border: 1px solid rgba(0,0,0,0.1);
-    }
-    .wp-red { background: #ef4444; }
-    .wp-green { background: #10b981; }
-    .wp-blue { background: #3b82f6; }
-
-    /* --- FULL CALENDAR IFRAME --- */
-    #calendar-modal {
-      position: absolute; bottom: -100%; left: 0; width: 100%; height: 95%;
-      background: #fff; 
-      transition: bottom 0.4s cubic-bezier(0.19, 1, 0.22, 1);
-      z-index: 160; border-top-left-radius: 24px; border-top-right-radius: 24px;
-      overflow: hidden; box-shadow: 0 -10px 50px rgba(0,0,0,0.5);
-    }
-    #calendar-modal.show { bottom: 0; }
-    .cal-header {
-      height: 60px; display: flex; justify-content: space-between; align-items: center;
-      padding: 0 25px; border-bottom: 1px solid #eee;
-      color: #333; font-weight: 700; font-size: 18px; 
-    }
-    .close-cal { cursor: pointer; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; background: #f3f4f6; border-radius: 50%; font-size: 18px; }
-
-    /* --- SETTINGS --- */
-    #settings-btn {
-      position: absolute; top: 30px; right: 30px; z-index: 250; /* Higher than panel! */
-      width: 48px; height: 48px; 
-      background: rgba(255,255,255,0.9); backdrop-filter: blur(10px);
-      border: 1px solid rgba(0,0,0,0.1); border-radius: 50%;
-      color: #333; display: flex; align-items: center; justify-content: center;
-      font-size: 24px; cursor: pointer; pointer-events: auto;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1); transition: transform 0.2s;
-    }
-    #settings-btn:active { transform: scale(0.9); }
-    
-    #settings-panel {
-      position: absolute; top: 0; right: -360px; width: 340px; height: 100%;
-      background: #111; color: #eee;
-      z-index: 200; transition: right 0.3s cubic-bezier(0.19, 1, 0.22, 1);
-      padding: 25px; box-sizing: border-box; border-left: 1px solid #333;
-      overflow-y: auto;
-    }
-    #settings-panel.open { right: 0; }
-    
-    /* New Settings Header */
-    .settings-header {
-        display: flex; justify-content: space-between; align-items: center;
-        margin-bottom: 30px; padding-bottom: 15px; border-bottom: 1px solid #333;
-    }
-    .settings-title { font-family: 'Permanent Marker', cursive; font-size: 1.5rem; color: #fff; }
-    .close-settings { 
-        cursor: pointer; width: 36px; height: 36px; 
-        background: #333; border-radius: 50%; 
-        display: flex; align-items: center; justify-content: center;
-        font-size: 18px; color: #fff; transition: background 0.2s;
-    }
-    .close-settings:hover { background: #444; }
-    
-    .setting-group { margin-bottom: 25px; padding-bottom: 20px; border-bottom: 1px solid #222; }
-    .setting-label { font-size: 0.8rem; color: #888; margin-bottom: 10px; display: block; text-transform: uppercase; letter-spacing: 1.5px; }
-    
-    .pro-btn {
-      display: block; width: 100%; padding: 14px; margin-bottom: 10px;
-      background: #252525; border: 1px solid #333; color: #eee; border-radius: 12px; 
-      text-align: left; cursor: pointer; font-weight: 500;
-      transition: all 0.2s;
-    }
-    .pro-btn:active { transform: scale(0.98); background: #333; }
-    .btn-primary { background: var(--accent-color); border: none; color: white; }
-    .btn-active { border: 1px solid var(--accent-color); color: var(--accent-color); background: rgba(59, 130, 246, 0.1); }
-    
-    .pro-select {
-      width: 100%; padding: 14px; background: #252525; border: 1px solid #333;
-      color: white; border-radius: 12px; font-size: 1rem; outline: none; margin-bottom: 12px;
-    }
-    
-    input[type=range] { width: 100%; margin: 10px 0; accent-color: var(--accent-color); }
-    #storage-status { font-size: 0.7rem; color: #888; margin-bottom: 10px; }
-
-  </style>
-</head>
-
-<body>
-  <input type="file" id="fileInput" webkitdirectory directory multiple style="display:none" />
-  <video id="wake-video" loop playsinline muted style="display:none"><source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4" /></video>
-
-  <div id="container">
-    <!-- Gear Icon (Z-Index increased) -->
-    <div id="settings-btn"><span class="material-symbols-rounded">settings</span></div>
-
-    <div id="settings-panel">
-      <!-- New Close Header -->
-      <div class="settings-header">
-          <div class="settings-title">Settings</div>
-          <div class="close-settings" id="btn-close-settings">✕</div>
-      </div>
-
-      <!-- Brightness -->
-      <div class="setting-group">
-        <span class="setting-label">Display</span>
-        <label style="font-size:0.9rem; color:#ccc; display:flex; justify-content:space-between;">
-          Brightness <span id="bright-val">100%</span>
-        </label>
-        <input type="range" id="brightness-slider" min="0.2" max="1" step="0.1" value="1">
-        <button id="btn-auto-bright" class="pro-btn">Auto-Dim (Night): OFF</button>
-      </div>
-
-      <!-- Source -->
-      <div class="setting-group">
-        <span class="setting-label">Media Source</span>
-        <button class="pro-btn btn-primary" id="btn-upload">+ Load Folder</button>
-        <div id="storage-status">Checking memory...</div>
-        <button class="pro-btn" id="btn-clear" style="background:#332222; color:#ff8888; font-size:0.8rem;">Clear Memory</button>
-      </div>
-
-      <!-- Controls -->
-      <div class="setting-group">
-        <span class="setting-label">Configuration</span>
-        <select id="timer-select" class="pro-select">
-          <option value="60000">1 Minute</option>
-          <option value="300000">5 Minutes</option>
-          <option value="600000">10 Minutes</option>
-          <option value="900000">15 Minutes</option>
-          <option value="1800000">30 Minutes</option>
-          <option value="2700000">45 Minutes</option>
-          <option value="3600000" selected>1 Hour</option>
-          <option value="10800000">3 Hours</option>
-          <option value="18000000">5 Hours</option>
-          <option value="static">Static</option>
-        </select>
-        
-        <button id="btn-rotate" class="pro-btn">Rotate Canvas (⟳)</button>
-        <button id="btn-layout" class="pro-btn">Layout: Single</button>
-        <button id="btn-auto-arrange" class="pro-btn">Auto-Arrange: OFF</button>
-        <button id="btn-shuffle" class="pro-btn">Shuffle: OFF</button>
-        <button id="btn-motion" class="pro-btn">Motion: OFF</button>
-        <button id="btn-fullscreen" class="pro-btn">Full Screen</button>
-        <button id="reset-btn" class="pro-btn" style="display:none;">Reset Pins</button>
-      </div>
-    </div>
-
-    <!-- Media Layer -->
-    <div id="photo-wrapper" class="mode-1">
-      <div id="box-1" class="img-box" style="top:10%; left:10%; width:280px;">
-        <div class="pin-handle"></div>
-        <div class="media-container" data-box="1"></div>
-        <div class="resize-handle"></div>
-      </div>
-      <div id="box-2" class="img-box" style="top:15%; left:50%; width:280px; display:none;">
-        <div class="pin-handle"></div>
-        <div class="media-container" data-box="2"></div>
-        <div class="resize-handle"></div>
-      </div>
-      <div id="box-3" class="img-box" style="top:50%; left:30%; width:280px; display:none;">
-        <div class="pin-handle"></div>
-        <div class="media-container" data-box="3"></div>
-        <div class="resize-handle"></div>
-      </div>
-    </div>
-
-    <!-- Sticky UI Layer -->
-    <div id="overlay">
-      <div id="ticker-tape">Loading Forecast...</div>
-      
-      <div id="sticky-container">
-        <!-- Time Note -->
-        <div id="time-widget" class="sticky-note">
-          <div class="widget-pin wp-red"></div>
-          <div id="time">00:00</div>
-        </div>
-
-        <!-- Agenda Note -->
-        <div id="agenda-box" class="sticky-note">
-          <div class="widget-pin wp-green"></div>
-          <div class="day-col">
-            <span class="day-label">Today</span>
-            <span class="day-date" id="date-today">--</span>
-          </div>
-          <div style="width:1px; background:#999;"></div>
-          <div class="day-col">
-            <span class="day-label">Tomrw</span>
-            <span class="day-date" id="date-tmrw">--</span>
-          </div>
-        </div>
-
-        <!-- Weather Note -->
-        <div id="weather-box" class="sticky-note">
-          <div class="widget-pin wp-blue"></div>
-          <div id="weather-main">
-            <div id="temp">--°</div>
-            <span class="material-symbols-rounded" id="weather-icon">wb_sunny</span>
-          </div>
-          <div id="condition">Loading</div>
-          <div id="weather-details">High --° Low --°</div>
+          <div id="weather-details">Fetching forecast...</div>
+          <div id="weather-tomorrow"></div>
         </div>
       </div>
     </div>
@@ -1461,873 +670,993 @@
     <div id="calendar-modal">
       <div class="cal-header">
         <span>Calendar</span>
-        <div class="close-cal" id="btn-close-cal">✕</div>
+        <div class="close-cal" id="btn-close-cal">
+          <span class="material-symbols-rounded" style="font-size:18px">close</span>
+        </div>
       </div>
       <iframe
         src="https://calendar.google.com/calendar/embed?src=runner4evs%40gmail.com&ctz=America%2FDenver&mode=MONTH&showTitle=0&showNav=1&showDate=1&showPrint=0&showTabs=0&showCalendars=0&bgcolor=%23ffffff"
-        style="border:0; width:100%; height:100%;"
-        frameborder="0"
-        scrolling="no">
+        style="border:0; width:100%; height:calc(100% - 56px);" frameborder="0" scrolling="no"
+        loading="lazy">
       </iframe>
     </div>
+
+    <div id="toast"></div>
   </div>
 
 <script>
-  /* ---------------------------
-    State & DB (Unchanged)
-  --------------------------- */
-  const state = {
-    mediaItems: [], indices: [0, 1, 2], layoutMode: 1,
-    shuffleActive: false, motionActive: false, autoArrangeActive: false,
-    screenRotState: 0, userLat: 40.3769, userLon: -111.7958,
-    slideDuration: 3600000, timers: [null, null, null], timeouts: [null, null, null],
-    loadedRatios: { 1: 1, 2: 1, 3: 1 }, currentObjectUrls: { 1: null, 2: null, 3: null },
-    rafId: null, pinColors: ['pin-red', 'pin-blue', 'pin-green', 'pin-yellow', 'pin-purple'],
-    autoBright: false, manualBright: 1
-  };
+/* ===========================================
+   STATE
+=========================================== */
+const S = {
+  mediaItems: [],
+  indices: [0, 1, 2],
+  layoutMode: 3,           // Default to corkboard
+  shuffleActive: true,      // Default ON for photo frame
+  motionActive: false,
+  autoArrangeActive: true,  // Default ON
+  screenRotState: 0,
+  userLat: 40.3769,
+  userLon: -111.7958,
+  slideDuration: 3600000,
+  timers: [null, null, null],
+  timeouts: [null, null, null],
+  loadedRatios: { 1: 1, 2: 1, 3: 1 },
+  currentObjectUrls: { 1: null, 2: null, 3: null },
+  pinAssignments: { 1: null, 2: null, 3: null },
+  pinColors: ['pin-red','pin-blue','pin-green','pin-yellow','pin-purple','pin-white'],
+  autoBright: false,
+  manualBright: 1,
+  wakeLock: null,
+  transitionDuration: 0.9,
+  settingsOpen: false
+};
 
-  const DB_NAME='FrameDB', STORE_NAME='mediaStore';
-  function initDB() { return new Promise((res, rej) => { const r = indexedDB.open(DB_NAME, 2); r.onerror=()=>rej(); r.onupgradeneeded=e=>{ const db=e.target.result; if(!db.objectStoreNames.contains(STORE_NAME)) db.createObjectStore(STORE_NAME, { keyPath:'id' }); }; r.onsuccess=e=>res(e.target.result); }); }
-  function makeFileId(f) { return `${f.webkitRelativePath||f.name}::${f.size}::${f.lastModified}`; }
+/* ===========================================
+   INDEXED DB
+=========================================== */
+const DB_NAME = 'FrameDB', STORE_NAME = 'mediaStore';
 
-  /* ---------------------------
-    Batch Saving (The Fix)
-  --------------------------- */
-  async function saveFilesToDB(files) {
-    const status = document.getElementById('storage-status');
-    status.innerText = "Initializing...";
+function initDB() {
+  return new Promise((res, rej) => {
+    const r = indexedDB.open(DB_NAME, 2);
+    r.onerror = () => rej(r.error);
+    r.onupgradeneeded = e => {
+      const db = e.target.result;
+      if (!db.objectStoreNames.contains(STORE_NAME))
+        db.createObjectStore(STORE_NAME, { keyPath: 'id' });
+    };
+    r.onsuccess = e => res(e.target.result);
+  });
+}
+
+function makeFileId(f) {
+  return `${f.webkitRelativePath || f.name}::${f.size}::${f.lastModified}`;
+}
+
+async function saveFilesToDB(files) {
+  const status = document.getElementById('storage-status');
+  status.innerText = 'Scanning files...';
+  try {
     const db = await initDB();
-    const validFiles = Array.from(files).filter(f => f.type.match(/^(image|video)/));
-    const total = validFiles.length;
+    const valid = Array.from(files).filter(f => f.type.match(/^(image|video)/));
+    const total = valid.length;
+    if (!total) { status.innerText = 'No valid media found.'; return; }
     let processed = 0;
-    const CHUNK_SIZE = 50;
-    
-    const processChunk = async (startIndex) => {
-      if (startIndex >= total) { status.innerText = `${total} saved.`; loadFromDB(); return; }
+    const CHUNK = 40;
+
+    const processChunk = async (start) => {
+      if (start >= total) {
+        status.innerText = `${total} items saved.`;
+        toast(`${total} photos loaded`);
+        loadFromDB();
+        return;
+      }
       const tx = db.transaction(STORE_NAME, 'readwrite');
       const store = tx.objectStore(STORE_NAME);
-      const endIndex = Math.min(startIndex + CHUNK_SIZE, total);
-      for (let i = startIndex; i < endIndex; i++) {
-        const f = validFiles[i];
-        store.put({ id: makeFileId(f), type: f.type.startsWith('video')?'video':'image', file: f });
+      const end = Math.min(start + CHUNK, total);
+      for (let i = start; i < end; i++) {
+        const f = valid[i];
+        store.put({ id: makeFileId(f), type: f.type.startsWith('video') ? 'video' : 'image', file: f });
       }
-      tx.oncomplete = () => { processed = endIndex; status.innerText = `Saving ${processed}/${total}...`; setTimeout(() => processChunk(endIndex), 10); };
-      tx.onerror = () => { status.innerText = "Error."; };
+      tx.oncomplete = () => {
+        processed = end;
+        status.innerText = `Saving ${processed}/${total}...`;
+        setTimeout(() => processChunk(end), 5);
+      };
+      tx.onerror = () => { status.innerText = 'Save error. Try again.'; };
     };
     processChunk(0);
+  } catch (e) {
+    status.innerText = 'Database error.';
+  }
+}
+
+async function loadFromDB() {
+  try {
+    const db = await initDB();
+    const tx = db.transaction(STORE_NAME, 'readonly');
+    const req = tx.objectStore(STORE_NAME).getAll();
+    req.onsuccess = () => {
+      S.mediaItems = (req.result || []).map(r => ({ id: r.id, type: r.type, file: r.file }));
+      const el = document.getElementById('storage-status');
+      el.innerText = S.mediaItems.length ? `${S.mediaItems.length} memories loaded` : 'No photos yet';
+      if (S.shuffleActive && S.mediaItems.length > 3) shuffleIndices();
+      refreshAll();
+    };
+  } catch (e) {
+    document.getElementById('storage-status').innerText = 'DB connection error';
+  }
+}
+
+async function clearMemory() {
+  if (!confirm('Clear all stored photos?')) return;
+  try {
+    const db = await initDB();
+    const tx = db.transaction(STORE_NAME, 'readwrite');
+    tx.objectStore(STORE_NAME).clear();
+    tx.oncomplete = () => {
+      [1, 2, 3].forEach(revokeBoxUrl);
+      S.mediaItems = [];
+      refreshAll();
+      document.getElementById('storage-status').innerText = 'Memory cleared.';
+      toast('All photos removed');
+    };
+  } catch (e) {}
+}
+
+/* ===========================================
+   MEDIA HELPERS
+=========================================== */
+function revokeBoxUrl(n) {
+  if (S.currentObjectUrls[n]) {
+    URL.revokeObjectURL(S.currentObjectUrls[n]);
+    S.currentObjectUrls[n] = null;
+  }
+}
+
+function getItemUrl(n, item) {
+  revokeBoxUrl(n);
+  const u = URL.createObjectURL(item.file);
+  S.currentObjectUrls[n] = u;
+  return u;
+}
+
+function shuffleIndices() {
+  const L = S.mediaItems.length;
+  if (L < 3) {
+    S.indices = [0, Math.min(1, L - 1), Math.min(2, L - 1)];
+    return;
+  }
+  const picks = new Set();
+  while (picks.size < 3) picks.add(Math.floor(Math.random() * L));
+  S.indices = [...picks];
+}
+
+function getNextIdx(curr) {
+  const L = S.mediaItems.length;
+  if (!L) return 0;
+  if (L <= 3) return (curr + 1) % L;
+
+  // Always prevent showing the same photo in multiple frames
+  const showing = new Set(S.indices);
+
+  if (S.shuffleActive) {
+    let n, tries = 0;
+    do {
+      n = Math.floor(Math.random() * L);
+      tries++;
+    } while (showing.has(n) && tries < 50);
+    return n;
   }
 
-  async function loadFromDB() {
-    try {
-      const db = await initDB(), tx = db.transaction(STORE_NAME, 'readonly'), req = tx.objectStore(STORE_NAME).getAll();
-      req.onsuccess = () => {
-        state.mediaItems = (req.result || []).map(r => ({ id:r.id, type:r.type, file:r.file }));
-        document.getElementById('storage-status').innerText = state.mediaItems.length ? `${state.mediaItems.length} Loaded.` : "Empty.";
-        refreshAll();
-      };
-    } catch (e) { document.getElementById('storage-status').innerText = "DB Error"; }
+  // Sequential: step forward but skip any index already on screen
+  let next = (curr + 1) % L;
+  let safety = 0;
+  while (showing.has(next) && next !== curr && safety < L) {
+    next = (next + 1) % L;
+    safety++;
+  }
+  return next;
+}
+
+/* ===========================================
+   RENDERING
+=========================================== */
+function renderBox(n, idx) {
+  const box = document.getElementById('box-' + n);
+  const con = box.querySelector('.media-container');
+  const caption = box.querySelector('.photo-caption');
+
+  if (!S.mediaItems.length) {
+    con.innerHTML = '';
+    if (caption) caption.textContent = '';
+    return;
+  }
+  if (idx >= S.mediaItems.length) idx = idx % S.mediaItems.length;
+
+  const item = S.mediaItems[idx];
+
+  // Crossfade: keep old element briefly
+  const oldEl = con.querySelector('.media-item.loaded');
+  if (oldEl) {
+    oldEl.classList.remove('loaded');
+    oldEl.classList.add('fading-out');
+    setTimeout(() => { if (oldEl.parentNode) oldEl.remove(); }, S.transitionDuration * 1000 + 100);
   }
 
-  async function clearMemory() {
-    const db = await initDB(), tx = db.transaction(STORE_NAME, 'readwrite'); tx.objectStore(STORE_NAME).clear();
-    tx.oncomplete = () => { [1,2,3].forEach(revokeBoxUrl); state.mediaItems = []; refreshAll(); document.getElementById('storage-status').innerText = "Cleared."; };
-  }
+  const el = document.createElement(item.type === 'video' ? 'video' : 'img');
+  el.className = 'media-item';
+  if (S.motionActive && item.type === 'image' && !document.hidden) el.classList.add('ken-burns');
 
-  /* ---------------------------
-    Helpers
-  --------------------------- */
-  function revokeBoxUrl(n) { if (state.currentObjectUrls[n]) { URL.revokeObjectURL(state.currentObjectUrls[n]); state.currentObjectUrls[n] = null; } }
-  function getItemUrl(n, item) { revokeBoxUrl(n); const u = URL.createObjectURL(item.file); state.currentObjectUrls[n] = u; return u; }
-  function getNextIdx(curr) {
-    const L = state.mediaItems.length; if (!L) return 0;
-    if (state.shuffleActive) { if (L===1) return 0; let next; do { next=Math.floor(Math.random()*L); } while (next===curr); return next; }
-    return (curr + 1) % L;
-  }
-
-  function renderBox(n, idx) {
-    const box = document.getElementById('box-'+n), con = box.querySelector('.media-container'); con.innerHTML = '';
-    if (!state.mediaItems || !state.mediaItems.length) return;
-    if (!state.mediaItems[idx]) idx = 0;
-    const item = state.mediaItems[idx], el = document.createElement(item.type==='video'?'video':'img');
-    el.className = 'media-item';
-    if (state.motionActive && item.type==='image' && !document.hidden) el.classList.add('ken-burns');
-
-    const pin = box.querySelector('.pin-handle');
-    if (pin) {
-      let savedColor = null;
-      try { const d = JSON.parse(localStorage.getItem('cork_layout')); if (d && d[n] && d[n].pin) savedColor = d[n].pin; } catch(e){}
-      if (!savedColor) savedColor = state.pinColors[Math.floor(Math.random()*state.pinColors.length)];
-      pin.className = 'pin-handle ' + savedColor;
-      if(state.layoutMode === 3) saveCork(); 
+  // Pin color — stable per box
+  const pin = box.querySelector('.pin-handle');
+  if (pin && S.layoutMode === 3) {
+    if (!S.pinAssignments[n]) {
+      // Try loading from saved cork first
+      let saved = null;
+      try { const d = JSON.parse(localStorage.getItem('cork_pins')); if (d && d[n]) saved = d[n]; } catch (e) {}
+      S.pinAssignments[n] = saved || S.pinColors[Math.floor(Math.random() * S.pinColors.length)];
     }
+    pin.className = 'pin-handle ' + S.pinAssignments[n];
+  }
 
-    const onLoad = () => {
-      el.classList.add('loaded');
-      const r = item.type==='video' ? (el.videoWidth ? el.videoHeight/el.videoWidth : 1) : (el.naturalWidth ? el.naturalHeight/el.naturalWidth : 1);
-      state.loadedRatios[n] = r || 1;
-      if (state.layoutMode === 3) {
-        if (state.autoArrangeActive) applySmartLayout();
-        else { const w = parseInt(box.style.width)||280; box.style.height = (w*(r||1)+50)+'px'; }
-        saveCork();
+  // Caption from filename
+  if (caption && S.layoutMode === 3) {
+    let name = item.file?.name || item.id || '';
+    name = name.replace(/\.[^.]+$/, '').replace(/[-_]/g, ' ').replace(/\d{8,}/g, '').trim();
+    if (name.length > 30) name = name.substring(0, 28) + '...';
+    caption.textContent = name || '';
+  }
+
+  const onLoad = () => {
+    el.classList.add('loaded');
+    const r = item.type === 'video'
+      ? (el.videoWidth ? el.videoHeight / el.videoWidth : 1)
+      : (el.naturalWidth ? el.naturalHeight / el.naturalWidth : 1);
+    S.loadedRatios[n] = r || 1;
+
+    if (S.layoutMode === 3) {
+      if (S.autoArrangeActive) applySmartLayout();
+      else {
+        const w = parseInt(box.style.width) || 300;
+        box.style.height = Math.round(w * r + 52) + 'px';
       }
+      saveCork();
+    }
+  };
+
+  if (item.type === 'video') {
+    el.loop = true; el.muted = true; el.autoplay = true;
+    el.playsInline = true; el.oncanplay = onLoad;
+  } else {
+    el.onload = onLoad;
+  }
+
+  el.src = getItemUrl(n, item);
+  con.appendChild(el);
+}
+
+/* Photo counter removed */
+
+function refreshAll() {
+  const wrapper = document.getElementById('photo-wrapper');
+  wrapper.className = 'mode-' + S.layoutMode;
+
+  const sticky = document.getElementById('sticky-container');
+  const resetBtn = document.getElementById('btn-reset-pins');
+
+  if (S.layoutMode === 1) {
+    sticky.classList.add('hidden');
+  } else {
+    sticky.classList.remove('hidden');
+  }
+  resetBtn.style.display = S.layoutMode === 3 ? 'flex' : 'none';
+
+  renderBox(1, S.indices[0]);
+  const b2 = document.getElementById('box-2');
+  const b3 = document.getElementById('box-3');
+
+  if (S.layoutMode === 3) {
+    b2.style.display = 'flex'; b3.style.display = 'flex';
+    renderBox(2, S.indices[1]);
+    renderBox(3, S.indices[2]);
+    loadCork();
+    if (S.autoArrangeActive) setTimeout(applySmartLayout, 50);
+  } else {
+    b2.style.display = 'none'; b3.style.display = 'none';
+    revokeBoxUrl(2); revokeBoxUrl(3);
+  }
+
+  updateTimers(document.getElementById('timer-select').value);
+}
+
+/* ===========================================
+   TIMER LOGIC
+=========================================== */
+function updateTimers(val) {
+  S.timers.forEach(t => t && clearInterval(t));
+  S.timeouts.forEach(t => t && clearTimeout(t));
+  S.timers = [null, null, null];
+  S.timeouts = [null, null, null];
+  if (val === 'static' || !S.mediaItems.length) return;
+
+  const dur = parseInt(val, 10);
+  S.slideDuration = dur;
+
+  const advance = (boxNum, idxSlot) => {
+    if (!S.mediaItems.length) return;
+    S.indices[idxSlot] = getNextIdx(S.indices[idxSlot]);
+    renderBox(boxNum, S.indices[idxSlot]);
+  };
+
+  S.timers[0] = setInterval(() => advance(1, 0), dur);
+
+  if (S.layoutMode === 3) {
+    // Stagger the 3 boxes so they don't all flip at once
+    S.timeouts[1] = setTimeout(() => {
+      advance(2, 1);
+      S.timers[1] = setInterval(() => advance(2, 1), dur);
+    }, Math.round(dur * 0.33));
+
+    S.timeouts[2] = setTimeout(() => {
+      advance(3, 2);
+      S.timers[2] = setInterval(() => advance(3, 2), dur);
+    }, Math.round(dur * 0.66));
+  }
+}
+
+/* ===========================================
+   SMART LAYOUT ENGINE (The Big Fix)
+=========================================== */
+function applySmartLayout() {
+  if (S.layoutMode !== 3 || !S.autoArrangeActive) return;
+
+  const W = window.innerWidth;
+  const H = window.innerHeight;
+  const PAD_TOP = 16;
+  const PAD_BOTTOM = 110; // Space for sticky notes only (ticker removed)
+  const PAD_SIDE = 16;
+  const POLAROID_BOTTOM = 52; // Padding below photo in polaroid frame
+  const GAP = 14;
+
+  const usableW = W - PAD_SIDE * 2;
+  const usableH = H - PAD_TOP - PAD_BOTTOM;
+
+  const ratios = [S.loadedRatios[1] || 1, S.loadedRatios[2] || 1, S.loadedRatios[3] || 1];
+
+  // For each photo: given width w, total box height = w * ratio + POLAROID_BOTTOM
+  // We want to maximize total photo area while fitting all 3 on screen.
+
+  // Strategy: Try side-by-side (3 columns) first, then try 2+1 arrangements
+  // Pick whichever gives the most total photo area.
+
+  const layouts = [];
+
+  // --- LAYOUT A: 3 columns side by side ---
+  {
+    const colW = Math.floor((usableW - GAP * 2) / 3);
+    const heights = ratios.map((r, i) => colW * r + POLAROID_BOTTOM);
+    const maxH = Math.max(...heights);
+    let finalW = colW;
+    if (maxH > usableH) {
+      // Scale down to fit tallest
+      const scale = usableH / maxH;
+      finalW = Math.floor(colW * scale);
+    }
+    const totalArea = ratios.reduce((sum, r) => sum + finalW * (finalW * r), 0);
+    const positions = [0, 1, 2].map((i) => {
+      const bh = finalW * ratios[i] + POLAROID_BOTTOM;
+      return {
+        x: PAD_SIDE + i * (finalW + GAP),
+        y: PAD_TOP + Math.floor((usableH - bh) * 0.35),
+        w: finalW
+      };
+    });
+    layouts.push({ area: totalArea, positions, label: 'columns' });
+  }
+
+  // --- LAYOUT B: 1 big + 2 stacked (big on left) ---
+  for (const bigIdx of [0, 1, 2]) {
+    const others = [0, 1, 2].filter(i => i !== bigIdx);
+    // Big takes ~55% width, small takes ~42%
+    const bigW = Math.floor(usableW * 0.56 - GAP / 2);
+    const smallW = Math.floor(usableW * 0.44 - GAP / 2);
+
+    const bigH = bigW * ratios[bigIdx] + POLAROID_BOTTOM;
+    let scaledBigW = bigW;
+    if (bigH > usableH) {
+      scaledBigW = Math.floor((usableH - POLAROID_BOTTOM) / ratios[bigIdx]);
+    }
+    const actualBigH = scaledBigW * ratios[bigIdx] + POLAROID_BOTTOM;
+
+    // Stack two small ones vertically
+    const s0H = smallW * ratios[others[0]] + POLAROID_BOTTOM;
+    const s1H = smallW * ratios[others[1]] + POLAROID_BOTTOM;
+    const stackH = s0H + s1H + GAP;
+    let scaledSmallW = smallW;
+    if (stackH > usableH) {
+      const scale = usableH / stackH;
+      scaledSmallW = Math.floor(smallW * scale);
+    }
+    const as0H = scaledSmallW * ratios[others[0]] + POLAROID_BOTTOM;
+    const as1H = scaledSmallW * ratios[others[1]] + POLAROID_BOTTOM;
+
+    const totalArea = scaledBigW * (scaledBigW * ratios[bigIdx])
+      + scaledSmallW * (scaledSmallW * ratios[others[0]])
+      + scaledSmallW * (scaledSmallW * ratios[others[1]]);
+
+    const bigX = PAD_SIDE;
+    const bigY = PAD_TOP + Math.floor((usableH - actualBigH) * 0.3);
+    const smallX = PAD_SIDE + scaledBigW + GAP;
+    const s0Y = PAD_TOP + Math.floor((usableH - as0H - as1H - GAP) * 0.3);
+    const s1Y = s0Y + as0H + GAP;
+
+    const positions = [];
+    positions[bigIdx] = { x: bigX, y: bigY, w: scaledBigW };
+    positions[others[0]] = { x: smallX, y: s0Y, w: scaledSmallW };
+    positions[others[1]] = { x: smallX, y: s1Y, w: scaledSmallW };
+
+    layouts.push({ area: totalArea, positions, label: `big-${bigIdx}-left` });
+  }
+
+  // --- LAYOUT C: 1 big + 2 stacked (big on right) ---
+  for (const bigIdx of [0, 1, 2]) {
+    const others = [0, 1, 2].filter(i => i !== bigIdx);
+    const bigW = Math.floor(usableW * 0.56 - GAP / 2);
+    const smallW = Math.floor(usableW * 0.44 - GAP / 2);
+
+    const bigH = bigW * ratios[bigIdx] + POLAROID_BOTTOM;
+    let scaledBigW = bigW;
+    if (bigH > usableH) {
+      scaledBigW = Math.floor((usableH - POLAROID_BOTTOM) / ratios[bigIdx]);
+    }
+    const actualBigH = scaledBigW * ratios[bigIdx] + POLAROID_BOTTOM;
+
+    const s0H = smallW * ratios[others[0]] + POLAROID_BOTTOM;
+    const s1H = smallW * ratios[others[1]] + POLAROID_BOTTOM;
+    const stackH = s0H + s1H + GAP;
+    let scaledSmallW = smallW;
+    if (stackH > usableH) {
+      const scale = usableH / stackH;
+      scaledSmallW = Math.floor(smallW * scale);
+    }
+    const as0H = scaledSmallW * ratios[others[0]] + POLAROID_BOTTOM;
+    const as1H = scaledSmallW * ratios[others[1]] + POLAROID_BOTTOM;
+
+    const totalArea = scaledBigW * (scaledBigW * ratios[bigIdx])
+      + scaledSmallW * (scaledSmallW * ratios[others[0]])
+      + scaledSmallW * (scaledSmallW * ratios[others[1]]);
+
+    const smallX = PAD_SIDE;
+    const bigX = PAD_SIDE + scaledSmallW + GAP;
+    const bigY = PAD_TOP + Math.floor((usableH - actualBigH) * 0.3);
+    const s0Y = PAD_TOP + Math.floor((usableH - as0H - as1H - GAP) * 0.3);
+    const s1Y = s0Y + as0H + GAP;
+
+    const positions = [];
+    positions[bigIdx] = { x: bigX, y: bigY, w: scaledBigW };
+    positions[others[0]] = { x: smallX, y: s0Y, w: scaledSmallW };
+    positions[others[1]] = { x: smallX, y: s1Y, w: scaledSmallW };
+
+    layouts.push({ area: totalArea, positions, label: `big-${bigIdx}-right` });
+  }
+
+  // Pick layout with maximum total area
+  layouts.sort((a, b) => b.area - a.area);
+  const best = layouts[0];
+
+  // Apply with slight organic rotation
+  [1, 2, 3].forEach((boxNum, i) => {
+    const b = document.getElementById('box-' + boxNum);
+    const pos = best.positions[i];
+    const r = ratios[i];
+    const h = Math.round(pos.w * r + POLAROID_BOTTOM);
+
+    // Clamp to screen bounds
+    const cx = Math.max(4, Math.min(W - pos.w - 4, pos.x));
+    const cy = Math.max(4, Math.min(H - h - PAD_BOTTOM + 20, pos.y));
+
+    b.style.width = pos.w + 'px';
+    b.style.height = h + 'px';
+    b.style.left = cx + 'px';
+    b.style.top = cy + 'px';
+
+    // Subtle organic rotation (-2 to 2 deg)
+    const rot = ((i * 1.7 + 0.5) % 4 - 2).toFixed(1);
+    b.style.transform = `rotate(${rot}deg)`;
+    b.style.zIndex = i + 1;
+  });
+
+  saveCork();
+}
+
+/* ===========================================
+   CORK PERSISTENCE
+=========================================== */
+function saveCork() {
+  if (S.layoutMode !== 3) return;
+  const d = {};
+  [1, 2, 3].forEach(i => {
+    const b = document.getElementById('box-' + i);
+    d[i] = {
+      t: b.style.top, l: b.style.left,
+      w: b.style.width, h: b.style.height,
+      r: b.style.transform
     };
-    if (item.type==='video') { el.loop=true; el.muted=true; el.autoplay=true; el.playsInline=true; el.oncanplay=onLoad; } else el.onload=onLoad;
-    el.src = getItemUrl(n, item); con.appendChild(el);
-  }
+  });
+  localStorage.setItem('cork_layout', JSON.stringify(d));
+  // Save pin colors separately so they're stable
+  localStorage.setItem('cork_pins', JSON.stringify(S.pinAssignments));
+}
 
-  function refreshAll() {
-    document.getElementById('photo-wrapper').className = 'mode-' + state.layoutMode;
-    document.getElementById('reset-btn').style.display = (state.layoutMode === 3) ? 'block' : 'none';
-    
-    // Toggle Sticky Visibility based on mode
-    const sticky = document.getElementById('sticky-container');
-    const ticker = document.getElementById('ticker-tape');
-    if(state.layoutMode === 1) { sticky.style.opacity = '0'; ticker.style.opacity = '0'; }
-    else { sticky.style.opacity = '1'; ticker.style.opacity = '1'; }
+function loadCork() {
+  if (S.autoArrangeActive) return; // Don't load saved positions if auto-arrange is on
+  try {
+    const d = JSON.parse(localStorage.getItem('cork_layout'));
+    if (!d) return;
+    [1, 2, 3].forEach(i => {
+      if (!d[i]) return;
+      const b = document.getElementById('box-' + i);
+      b.style.top = d[i].t;
+      b.style.left = d[i].l;
+      b.style.width = d[i].w;
+      b.style.height = d[i].h;
+      b.style.transform = d[i].r;
+    });
+  } catch (e) {}
+  // Load pin colors
+  try {
+    const p = JSON.parse(localStorage.getItem('cork_pins'));
+    if (p) { S.pinAssignments[1] = p[1]; S.pinAssignments[2] = p[2]; S.pinAssignments[3] = p[3]; }
+  } catch (e) {}
+}
 
-    renderBox(1, state.indices[0]);
-    const b2=document.getElementById('box-2'), b3=document.getElementById('box-3');
-    if (state.layoutMode >= 2) { b2.style.display='flex'; renderBox(2, state.indices[1]); } else { b2.style.display='none'; revokeBoxUrl(2); }
-    if (state.layoutMode === 3) { b3.style.display='flex'; renderBox(3, state.indices[2]); loadCork(); } else { b3.style.display='none'; revokeBoxUrl(3); }
-    updateTimer(document.getElementById('timer-select').value);
-  }
+/* ===========================================
+   WEATHER
+=========================================== */
+const WEATHER_ICONS = {
+  0: 'wb_sunny', 1: 'wb_sunny', 2: 'partly_cloudy_day', 3: 'cloud',
+  45: 'foggy', 48: 'foggy', 51: 'grain', 53: 'rainy', 55: 'rainy',
+  56: 'rainy', 57: 'rainy', 61: 'rainy', 63: 'rainy', 65: 'rainy',
+  66: 'rainy', 67: 'rainy', 71: 'ac_unit', 73: 'ac_unit', 75: 'ac_unit',
+  77: 'ac_unit', 80: 'rainy', 81: 'rainy', 82: 'rainy',
+  85: 'ac_unit', 86: 'ac_unit', 95: 'thunderstorm', 96: 'thunderstorm', 99: 'thunderstorm'
+};
 
-  function updateTimer(val) {
-    state.timers.forEach(t => t && clearInterval(t)); state.timeouts.forEach(t => t && clearTimeout(t));
-    state.timers = [null,null,null]; state.timeouts = [null,null,null];
-    if (val === 'static') return;
-    const dur = parseInt(val, 10);
-    const tick = (n, i) => { if (state.mediaItems.length) { state.indices[i] = getNextIdx(state.indices[i]); renderBox(n, state.indices[i]); } };
-    state.timers[0] = setInterval(() => tick(1,0), dur);
-    if (state.layoutMode >= 2) state.timeouts[1] = setTimeout(() => { tick(2,1); state.timers[1] = setInterval(() => tick(2,1), dur); }, dur/3);
-    if (state.layoutMode === 3) state.timeouts[2] = setTimeout(() => { tick(3,2); state.timers[2] = setInterval(() => tick(3,2), dur); }, (dur/3)*2);
-  }
+function weatherLabel(code) {
+  const map = {
+    0: 'Clear Skies', 1: 'Mostly Clear', 2: 'Partly Cloudy', 3: 'Overcast',
+    45: 'Foggy', 48: 'Rime Fog', 51: 'Light Drizzle', 53: 'Drizzle', 55: 'Heavy Drizzle',
+    61: 'Light Rain', 63: 'Rain', 65: 'Heavy Rain', 71: 'Light Snow', 73: 'Snow', 75: 'Heavy Snow',
+    77: 'Snow Grains', 80: 'Rain Showers', 81: 'Mod. Showers', 82: 'Heavy Showers',
+    85: 'Snow Showers', 95: 'Thunderstorm', 96: 'Hail Storm', 99: 'Severe Storm'
+  };
+  return map[code] || 'Weather';
+}
 
-  /* ---------------------------
-    Weather Logic
-  --------------------------- */
-  const icons = { 0:'wb_sunny', 1:'wb_sunny', 2:'partly_cloudy_day', 3:'cloud', 45:'foggy', 51:'rainy', 61:'rainy', 63:'rainy', 71:'ac_unit', 80:'rainy', 95:'thunderstorm' };
-  function weatherLabel(code) { const map = { 0:'Clear', 1:'Fair', 2:'Partly Cloudy', 3:'Cloudy', 45:'Fog', 51:'Drizzle', 61:'Rain', 71:'Snow', 95:'Storm' }; return map[code]||'Weather'; }
+async function updateWeather() {
+  try {
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${S.userLat}&longitude=${S.userLon}`
+      + `&current_weather=true`
+      + `&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max,weathercode`
+      + `&hourly=apparent_temperature,relativehumidity_2m,windspeed_10m`
+      + `&temperature_unit=fahrenheit&windspeed_unit=mph&timezone=auto`
+      + `&forecast_days=2`;
+    const r = await fetch(url);
+    const d = await r.json();
+    if (!d.current_weather) return;
 
-  async function updateWeather() {
-    try {
-      const r = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${state.userLat}&longitude=${state.userLon}&current_weather=true&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max&temperature_unit=fahrenheit&timezone=auto`);
-      const d = await r.json(); if(!d.current_weather) return;
-      const t = Math.round(d.current_weather.temperature), c = d.current_weather.weathercode, night = d.current_weather.is_day===0;
-      
-      document.getElementById('temp').innerText = t + "°";
-      document.getElementById('condition').innerText = (night && c<=2) ? "Clear Night" : weatherLabel(c);
-      document.getElementById('weather-icon').innerText = (night && c<=2) ? 'bedtime' : (icons[c]||'cloud');
-      
-      const hi = Math.round(d.daily.temperature_2m_max[0]), lo = Math.round(d.daily.temperature_2m_min[0]), precip = d.daily.precipitation_probability_max[0];
-      document.getElementById('weather-details').innerText = `High ${hi}° Low ${lo}°`;
-      
-      const msg = `Today: ${hi}°/${lo}°. ` + (precip > 30 ? `Precipitation: ${precip}%.` : `Enjoy the view.`);
-      document.getElementById('ticker-tape').innerText = msg;
-    } catch(e) {}
-  }
+    const temp = Math.round(d.current_weather.temperature);
+    const code = d.current_weather.weathercode;
+    const isNight = d.current_weather.is_day === 0;
+    const wind = Math.round(d.current_weather.windspeed);
 
-  function checkBrightness() {
-    const h = new Date().getHours(), night = h >= 22 || h < 7;
-    document.body.style.filter = `brightness(${state.autoBright && night ? 0.4 : state.manualBright})`;
-  }
+    const nowHour = new Date().getHours();
+    const feelsLike = d.hourly?.apparent_temperature?.[nowHour]
+      ? Math.round(d.hourly.apparent_temperature[nowHour]) : temp;
+    const humidity = d.hourly?.relativehumidity_2m?.[nowHour] || '--';
 
-  /* ---------------------------
-    UI Binding
-  --------------------------- */
-  function bindUI() {
-    const click = (id, fn) => document.getElementById(id).addEventListener('click', fn);
-    click('settings-btn', () => document.getElementById('settings-panel').classList.toggle('open'));
-    // New Close Button
-    click('btn-close-settings', () => document.getElementById('settings-panel').classList.remove('open'));
-    
-    click('time-widget', () => document.getElementById('settings-panel').classList.toggle('open'));
-    click('agenda-box', () => document.getElementById('calendar-modal').classList.toggle('show'));
-    click('btn-close-cal', () => document.getElementById('calendar-modal').classList.toggle('show'));
-    click('btn-upload', () => document.getElementById('fileInput').click());
-    click('btn-clear', clearMemory);
-    click('btn-layout', () => { state.layoutMode = (state.layoutMode % 3) + 1; refreshAll(); document.getElementById('btn-layout').innerText="Layout: "+["Single","Staggered","Corkboard"][state.layoutMode-1]; });
-    click('btn-shuffle', () => { state.shuffleActive = !state.shuffleActive; document.getElementById('btn-shuffle').classList.toggle('btn-active'); });
-    click('btn-motion', () => { state.motionActive = !state.motionActive; document.getElementById('btn-motion').classList.toggle('btn-active'); refreshAll(); });
-    click('btn-auto-arrange', () => { state.autoArrangeActive = !state.autoArrangeActive; document.getElementById('btn-auto-arrange').classList.toggle('btn-active'); if(state.autoArrangeActive) applySmartLayout(); });
-    click('btn-rotate', () => { state.screenRotState = (state.screenRotState + 1) % 4; applyRot(); });
-    click('btn-fullscreen', () => { if(!document.fullscreenElement) document.documentElement.requestFullscreen(); else document.exitFullscreen(); });
-    click('reset-btn', () => { localStorage.removeItem('cork_layout'); refreshAll(); });
-    click('btn-auto-bright', () => { state.autoBright = !state.autoBright; document.getElementById('btn-auto-bright').classList.toggle('btn-active'); checkBrightness(); });
-    
-    document.getElementById('brightness-slider').addEventListener('input', (e) => { state.manualBright = parseFloat(e.target.value); document.getElementById('bright-val').innerText = Math.round(state.manualBright*100)+'%'; checkBrightness(); });
-    document.getElementById('timer-select').addEventListener('change', (e) => updateTimer(e.target.value));
-    document.getElementById('fileInput').addEventListener('change', function() { if(this.files.length) saveFilesToDB(this.files); });
-    
-    document.querySelectorAll('.media-container').forEach(mc => { mc.addEventListener('click', () => { const n = parseInt(mc.dataset.box); if(!state.mediaItems.length) return; state.indices[n-1] = getNextIdx(state.indices[n-1]); renderBox(n, state.indices[n-1]); }); });
-  }
+    document.getElementById('temp').innerText = temp + '°';
+    document.getElementById('condition').innerText =
+      (isNight && code <= 2) ? 'Clear Night' : weatherLabel(code);
+    document.getElementById('weather-icon').innerText =
+      (isNight && code <= 2) ? 'bedtime' : (WEATHER_ICONS[code] || 'cloud');
 
-  function applyRot() {
-    const c = document.getElementById('container'), d = state.screenRotState * 90, w = window.innerWidth, h = window.innerHeight;
-    c.style.transform = (d===0) ? 'none' : (d===180 ? 'rotate(180deg)' : `translate(${(w-h)/2}px, ${(h-w)/2}px) rotate(${d}deg)`);
-    setTimeout(applySmartLayout, 200);
-  }
+    const hi = Math.round(d.daily.temperature_2m_max[0]);
+    const lo = Math.round(d.daily.temperature_2m_min[0]);
+    const precip = d.daily.precipitation_probability_max?.[0] || 0;
 
-  /* ---------------------------
-    Smart Layout & Drag (Raised Height)
-  --------------------------- */
-  function applySmartLayout() {
-    if (state.layoutMode !== 3 || !state.autoArrangeActive) return;
-    const w = window.innerWidth, H = window.innerHeight;
-    const r = [1,2,3].map(i => state.loadedRatios[i]||1), p = r.filter(x => x > 0.95).length;
-    
-    // ADJUSTED HEIGHTS: Moved 'top' values UP (e.g. 50% -> 30%)
-    const set = (i, t, l, wid) => {
-      const b = document.getElementById('box-'+i);
-      b.style.top = t; b.style.left = l; b.style.width = wid + 'px';
-      b.style.height = (wid * (state.loadedRatios[i]||1) + 50) + 'px';
-      b.style.transform = `rotate(${(Math.random()*6-3).toFixed(1)}deg)`;
-    };
-    
-    if (p === 3) { 
-        // Three Portraits: Lifted to 10% top
-        const wd=w/3.4; set(1,'10%','3%',wd); set(2,'10%','35%',wd); set(3,'10%','68%',wd); 
+    // Today's details — all in the sticky
+    let details = `H ${hi}°  L ${lo}°`;
+    if (Math.abs(feelsLike - temp) >= 3) details += `  ·  Feels ${feelsLike}°`;
+    if (wind > 5) details += `  ·  ${wind} mph`;
+    if (precip > 15) details += `  ·  ${precip}% rain`;
+    document.getElementById('weather-details').innerText = details;
+
+    // Tomorrow's mini-forecast inside the sticky
+    const tmrwEl = document.getElementById('weather-tomorrow');
+    const hiTmrw = d.daily.temperature_2m_max[1] ? Math.round(d.daily.temperature_2m_max[1]) : null;
+    const loTmrw = d.daily.temperature_2m_min[1] ? Math.round(d.daily.temperature_2m_min[1]) : null;
+    const tmrwCode = d.daily.weathercode?.[1];
+    const tmrwPrecip = d.daily.precipitation_probability_max?.[1] || 0;
+
+    if (hiTmrw !== null && tmrwCode !== undefined) {
+      let tmrw = `Tmrw: ${weatherLabel(tmrwCode)} ${hiTmrw}°/${loTmrw}°`;
+      if (tmrwPrecip > 20) tmrw += ` · ${tmrwPrecip}%`;
+      tmrwEl.innerText = tmrw;
+    } else {
+      tmrwEl.innerText = '';
     }
-    else if (p === 0) { 
-        // Pyramid: Top row 5%, Bottom row 35% (was 50%)
-        const wd=w/2.6; set(1,'5%','5%',wd); set(2,'5%','55%',wd); set(3,'35%','30%',wd); 
-    }
-    else { 
-        // Mixed: Portrait 10%, Landscape 10% & 30% (was 55%)
-        const wp=w/4, wl=w/2.8; set(1,'10%','5%',wp); set(2,'10%','75%',wp); set(3,'30%','30%',wl); 
-    }
+
+  } catch (e) {
+    document.getElementById('weather-details').innerText = 'Unavailable';
+  }
+}
+
+/* ===========================================
+   BRIGHTNESS & WAKE LOCK
+=========================================== */
+function checkBrightness() {
+  const h = new Date().getHours();
+  const night = h >= 22 || h < 6;
+  const dimNight = h >= 23 || h < 5;
+  let bright = S.manualBright;
+  if (S.autoBright) {
+    if (dimNight) bright = Math.min(bright, 0.3);
+    else if (night) bright = Math.min(bright, 0.5);
+  }
+  document.body.style.filter = `brightness(${bright})`;
+}
+
+async function toggleWakeLock() {
+  if (S.wakeLock) {
+    try { await S.wakeLock.release(); } catch (e) {}
+    S.wakeLock = null;
+    return false;
+  }
+  try {
+    S.wakeLock = await navigator.wakeLock.request('screen');
+    S.wakeLock.addEventListener('release', () => { S.wakeLock = null; });
+    return true;
+  } catch (e) {
+    toast('Wake lock not supported');
+    return false;
+  }
+}
+
+/* ===========================================
+   SAVE/LOAD SETTINGS
+=========================================== */
+function saveSettings() {
+  const settings = {
+    layoutMode: S.layoutMode,
+    shuffleActive: S.shuffleActive,
+    motionActive: S.motionActive,
+    autoArrangeActive: S.autoArrangeActive,
+    autoBright: S.autoBright,
+    manualBright: S.manualBright,
+    slideDuration: S.slideDuration,
+    transitionDuration: S.transitionDuration
+  };
+  localStorage.setItem('frame_settings', JSON.stringify(settings));
+}
+
+function loadSettings() {
+  try {
+    const s = JSON.parse(localStorage.getItem('frame_settings'));
+    if (!s) return;
+    if (s.layoutMode !== undefined) S.layoutMode = s.layoutMode;
+    if (s.shuffleActive !== undefined) S.shuffleActive = s.shuffleActive;
+    if (s.motionActive !== undefined) S.motionActive = s.motionActive;
+    if (s.autoArrangeActive !== undefined) S.autoArrangeActive = s.autoArrangeActive;
+    if (s.autoBright !== undefined) S.autoBright = s.autoBright;
+    if (s.manualBright !== undefined) S.manualBright = s.manualBright;
+    if (s.slideDuration !== undefined) S.slideDuration = s.slideDuration;
+    if (s.transitionDuration !== undefined) S.transitionDuration = s.transitionDuration;
+  } catch (e) {}
+}
+
+/* ===========================================
+   UI SYNC - Keep buttons in sync with state
+=========================================== */
+function syncUI() {
+  const tag = (id) => document.getElementById(id).querySelector('.btn-tag');
+
+  tag('btn-shuffle').textContent = S.shuffleActive ? 'ON' : 'OFF';
+  document.getElementById('btn-shuffle').classList.toggle('btn-active', S.shuffleActive);
+
+  tag('btn-motion').textContent = S.motionActive ? 'ON' : 'OFF';
+  document.getElementById('btn-motion').classList.toggle('btn-active', S.motionActive);
+
+  tag('btn-auto-arrange').textContent = S.autoArrangeActive ? 'ON' : 'OFF';
+  document.getElementById('btn-auto-arrange').classList.toggle('btn-active', S.autoArrangeActive);
+
+  tag('btn-auto-bright').textContent = S.autoBright ? 'ON' : 'OFF';
+  document.getElementById('btn-auto-bright').classList.toggle('btn-active', S.autoBright);
+
+  tag('btn-layout').textContent = S.layoutMode === 1 ? 'SINGLE' : 'CORKBOARD';
+  tag('btn-rotate').textContent = (S.screenRotState * 90) + '°';
+
+  // Timer select
+  const timerSel = document.getElementById('timer-select');
+  const durStr = S.slideDuration.toString();
+  for (const opt of timerSel.options) {
+    if (opt.value === durStr) { timerSel.value = durStr; break; }
+  }
+
+  // Brightness slider
+  document.getElementById('brightness-slider').value = Math.round(S.manualBright * 100);
+  document.getElementById('bright-val').textContent = Math.round(S.manualBright * 100) + '%';
+
+  // Transition slider
+  document.getElementById('transition-slider').value = Math.round(S.transitionDuration * 10);
+  document.getElementById('trans-val').textContent = S.transitionDuration.toFixed(1) + 's';
+
+  document.documentElement.style.setProperty('--transition-photos', S.transitionDuration + 's');
+}
+
+/* ===========================================
+   TOAST
+=========================================== */
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(el._timer);
+  el._timer = setTimeout(() => el.classList.remove('show'), 2500);
+}
+
+/* ===========================================
+   DRAG & RESIZE
+=========================================== */
+let drag = { el: null, res: false, down: false, sx: 0, sy: 0, sw: 0, sh: 0, st: 0, sl: 0 };
+
+document.addEventListener('pointerdown', e => {
+  const p = e.target.closest('.pin-handle');
+  const r = e.target.closest('.resize-handle');
+  if (S.layoutMode !== 3 || (!p && !r)) return;
+
+  drag.el = (p || r).parentElement;
+  drag.res = !!r;
+  drag.down = true;
+  drag.sx = e.clientX; drag.sy = e.clientY;
+  drag.sw = drag.el.offsetWidth; drag.sh = drag.el.offsetHeight;
+  drag.st = drag.el.offsetTop; drag.sl = drag.el.offsetLeft;
+  drag.el.style.zIndex = 100;
+  drag.el.classList.add('dragging');
+
+  if (S.autoArrangeActive) {
+    S.autoArrangeActive = false;
+    syncUI(); saveSettings();
+    toast('Auto-arrange off — drag freely');
+  }
+  e.preventDefault();
+});
+
+document.addEventListener('pointermove', e => {
+  if (!drag.down || !drag.el) return;
+  const dx = e.clientX - drag.sx;
+  const dy = e.clientY - drag.sy;
+
+  if (drag.res) {
+    // Corner resize: scale proportionally
+    const nw = Math.max(120, drag.sw + dx);
+    const bn = parseInt(drag.el.querySelector('.media-container').dataset.box);
+    const r = S.loadedRatios[bn] || 1;
+    drag.el.style.width = nw + 'px';
+    drag.el.style.height = Math.round(nw * r + 52) + 'px';
+  } else {
+    drag.el.style.left = (drag.sl + dx) + 'px';
+    drag.el.style.top = (drag.st + dy) + 'px';
+  }
+});
+
+document.addEventListener('pointerup', () => {
+  if (drag.el) {
+    drag.el.style.zIndex = '';
+    drag.el.classList.remove('dragging');
     saveCork();
   }
+  drag.el = null; drag.down = false;
+});
 
-  function saveCork() { if (state.layoutMode!==3) return; const d={}; [1,2,3].forEach(i=>{ const b=document.getElementById('box-'+i), p=b.querySelector('.pin-handle'); let c=''; if(p) state.pinColors.forEach(pc=>{if(p.classList.contains(pc))c=pc;}); d[i]={t:b.style.top, l:b.style.left, w:b.style.width, h:b.style.height, r:b.style.transform, pin:c}; }); localStorage.setItem('cork_layout', JSON.stringify(d)); }
-  function loadCork() { try{ const d=JSON.parse(localStorage.getItem('cork_layout')); if(d) [1,2,3].forEach(i=>{ if(d[i]){ const b=document.getElementById('box-'+i); b.style.top=d[i].t; b.style.left=d[i].l; b.style.width=d[i].w; b.style.height=d[i].h; b.style.transform=d[i].r; if(d[i].pin){const p=b.querySelector('.pin-handle'); if(p) p.className='pin-handle '+d[i].pin;} } }); }catch(e){} }
+/* ===========================================
+   CLOCK TICK
+=========================================== */
+function clockTick() {
+  const now = new Date();
+  const tmrw = new Date(now);
+  tmrw.setDate(now.getDate() + 1);
 
-  let drag = { el:null, res:false, down:false, sx:0, sy:0, sw:0, st:0, sl:0 };
-  document.addEventListener('pointerdown', e => {
-    const p = e.target.closest('.pin-handle'), r = e.target.closest('.resize-handle');
-    if (state.layoutMode !== 3 || (!p && !r)) return;
-    drag.el = p ? p.parentElement : r.parentElement; drag.res = !!r; drag.down = true;
-    drag.sx = e.clientX; drag.sy = e.clientY; drag.sw = drag.el.offsetWidth; drag.st = drag.el.offsetTop; drag.sl = drag.el.offsetLeft;
-    drag.el.style.zIndex = 1000;
-    if (state.autoArrangeActive) { state.autoArrangeActive=false; document.getElementById('btn-auto-arrange').classList.remove('btn-active'); }
-    e.preventDefault();
+  // Time
+  const h = now.getHours();
+  const m = now.getMinutes().toString().padStart(2, '0');
+  const h12 = h % 12 || 12;
+  const ampm = h >= 12 ? 'PM' : 'AM';
+  document.getElementById('time-display').innerHTML = `${h12}:${m}<span id="ampm">${ampm}</span>`;
+
+  // Date line under time
+  document.getElementById('date-line').textContent =
+    now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+
+  // Agenda dates
+  document.getElementById('date-today').textContent = now.getDate();
+  document.getElementById('date-today-sub').textContent =
+    now.toLocaleDateString('en-US', { weekday: 'short' });
+
+  document.getElementById('date-tmrw').textContent = tmrw.getDate();
+  document.getElementById('date-tmrw-sub').textContent =
+    tmrw.toLocaleDateString('en-US', { weekday: 'short' });
+
+  if (S.autoBright) checkBrightness();
+}
+
+/* ===========================================
+   ROTATION
+=========================================== */
+function applyRot() {
+  const c = document.getElementById('container');
+  const d = S.screenRotState * 90;
+  const w = window.innerWidth, h = window.innerHeight;
+  if (d === 0) c.style.transform = 'none';
+  else if (d === 180) c.style.transform = 'rotate(180deg)';
+  else c.style.transform = `translate(${(w - h) / 2}px, ${(h - w) / 2}px) rotate(${d}deg)`;
+  setTimeout(applySmartLayout, 300);
+}
+
+/* ===========================================
+   BIND ALL UI
+=========================================== */
+function bindUI() {
+  const $ = id => document.getElementById(id);
+  const click = (id, fn) => $(id).addEventListener('click', fn);
+
+  // Settings toggle
+  click('settings-btn', () => {
+    S.settingsOpen = !S.settingsOpen;
+    $('settings-panel').classList.toggle('open', S.settingsOpen);
+    $('settings-btn').classList.toggle('active', S.settingsOpen);
   });
-  document.addEventListener('pointermove', e => {
-    if (!drag.down || !drag.el) return;
-    const dx = e.clientX - drag.sx, dy = e.clientY - drag.sy;
-    if (drag.res) { const nw = Math.max(150, drag.sw + dx); drag.el.style.width = nw + 'px'; const bn = parseInt(drag.el.querySelector('.media-container').dataset.box); drag.el.style.height = (nw * (state.loadedRatios[bn]||1) + 50) + 'px'; }
-    else { drag.el.style.left = (drag.sl + dx) + 'px'; drag.el.style.top = (drag.st + dy) + 'px'; }
+  click('btn-close-settings', () => {
+    S.settingsOpen = false;
+    $('settings-panel').classList.remove('open');
+    $('settings-btn').classList.remove('active');
   });
-  document.addEventListener('pointerup', () => { if(drag.el){ drag.el.style.zIndex=''; saveCork(); } drag.el=null; drag.down=false; });
 
-  function tick() {
-    const n = new Date(), t = new Date(n); t.setDate(n.getDate()+1);
-    document.getElementById('time').innerText = n.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
-    document.getElementById('date-today').innerText = n.toLocaleDateString([], {weekday:'short', day:'numeric'});
-    document.getElementById('date-tmrw').innerText = t.toLocaleDateString([], {weekday:'short', day:'numeric'});
-    if(state.autoBright) checkBrightness();
-  }
+  // Widgets
+  click('time-widget', () => {
+    S.settingsOpen = !S.settingsOpen;
+    $('settings-panel').classList.toggle('open', S.settingsOpen);
+    $('settings-btn').classList.toggle('active', S.settingsOpen);
+  });
+  click('agenda-box', () => $('calendar-modal').classList.toggle('show'));
+  click('btn-close-cal', () => $('calendar-modal').classList.remove('show'));
+  click('weather-box', () => { updateWeather(); toast('Refreshing weather...'); });
 
-  initDB(); bindUI(); loadFromDB(); setInterval(tick, 1000); updateWeather(); setInterval(updateWeather, 900000); tick();
+  // Photos
+  click('btn-upload', () => $('fileInput').click());
+  click('btn-clear', clearMemory);
+  $('fileInput').addEventListener('change', function () {
+    if (this.files.length) saveFilesToDB(this.files);
+  });
+
+  // Layout
+  click('btn-layout', () => {
+    S.layoutMode = S.layoutMode === 1 ? 3 : 1;
+    syncUI(); saveSettings(); refreshAll();
+  });
+  click('btn-auto-arrange', () => {
+    S.autoArrangeActive = !S.autoArrangeActive;
+    syncUI(); saveSettings();
+    if (S.autoArrangeActive) applySmartLayout();
+  });
+  click('btn-reset-pins', () => {
+    localStorage.removeItem('cork_layout');
+    localStorage.removeItem('cork_pins');
+    S.pinAssignments = { 1: null, 2: null, 3: null };
+    S.autoArrangeActive = true;
+    syncUI(); saveSettings(); refreshAll();
+    toast('Layout reset');
+  });
+
+  // Slideshow
+  click('btn-shuffle', () => {
+    S.shuffleActive = !S.shuffleActive;
+    syncUI(); saveSettings();
+  });
+  click('btn-motion', () => {
+    S.motionActive = !S.motionActive;
+    syncUI(); saveSettings(); refreshAll();
+  });
+  $('timer-select').addEventListener('change', e => {
+    const v = e.target.value;
+    S.slideDuration = v === 'static' ? v : parseInt(v, 10);
+    saveSettings();
+    updateTimers(v);
+  });
+
+  // Display
+  $('brightness-slider').addEventListener('input', e => {
+    S.manualBright = parseInt(e.target.value, 10) / 100;
+    $('bright-val').textContent = e.target.value + '%';
+    checkBrightness();
+    saveSettings();
+  });
+  $('transition-slider').addEventListener('input', e => {
+    S.transitionDuration = parseInt(e.target.value, 10) / 10;
+    $('trans-val').textContent = S.transitionDuration.toFixed(1) + 's';
+    document.documentElement.style.setProperty('--transition-photos', S.transitionDuration + 's');
+    saveSettings();
+  });
+  click('btn-auto-bright', () => {
+    S.autoBright = !S.autoBright;
+    syncUI(); saveSettings(); checkBrightness();
+  });
+  click('btn-screen-wake', async () => {
+    const on = await toggleWakeLock();
+    const tag = $('btn-screen-wake').querySelector('.btn-tag');
+    tag.textContent = S.wakeLock ? 'ON' : 'OFF';
+    $('btn-screen-wake').classList.toggle('btn-active', !!S.wakeLock);
+    toast(S.wakeLock ? 'Screen will stay on' : 'Screen wake released');
+  });
+
+  // Tools
+  click('btn-rotate', () => {
+    S.screenRotState = (S.screenRotState + 1) % 4;
+    syncUI(); applyRot();
+  });
+  click('btn-fullscreen', () => {
+    if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(() => {});
+    else document.exitFullscreen().catch(() => {});
+  });
+
+  // Click photos to advance
+  document.querySelectorAll('.media-container').forEach(mc => {
+    mc.addEventListener('click', () => {
+      const n = parseInt(mc.dataset.box);
+      if (!S.mediaItems.length) return;
+      S.indices[n - 1] = getNextIdx(S.indices[n - 1]);
+      renderBox(n, S.indices[n - 1]);
+    });
+  });
+
+  // Resize handler on window
+  let resizeTimer;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+      if (S.autoArrangeActive) applySmartLayout();
+    }, 200);
+  });
+
+  // Re-acquire wake lock on visibility change
+  document.addEventListener('visibilitychange', async () => {
+    if (document.visibilityState === 'visible' && S.wakeLock === null) {
+      // Try to re-acquire if it was released
+    }
+  });
+}
+
+/* ===========================================
+   INIT
+=========================================== */
+async function init() {
+  loadSettings();
+  syncUI();
+  bindUI();
+  clockTick();
+  setInterval(clockTick, 1000);
+  checkBrightness();
+
+  await initDB();
+  await loadFromDB();
+
+  updateWeather();
+  setInterval(updateWeather, 600000); // Every 10 min
+}
+
+init();
 </script>
 </body>
 </html>
-
-
-    /* MODE 1: Single */
-    .mode-1 .img-box { width: 100% !important; height: 100% !important; top: 0 !important; left: 0 !important; transform: none !important; border: none !important; padding: 0 !important; background: #000; }
-
-    /* MODE 2: Staggered */
-    .mode-2 .img-box { width: 80%; height: 70%; background: #111; border: 4px solid #222; box-shadow: 0 10px 40px rgba(0,0,0,0.6); }
-    .mode-2 #box-1 { top: 15%; left: 10%; z-index: 2; transform: rotate(-2deg); }
-    .mode-2 #box-2 { top: 20%; left: 15%; z-index: 1; transform: rotate(3deg); opacity: 0.8; }
-
-    /* MODE 3: Realistic Corkboard */
-    .mode-3 {
-      background-color: #8a6a4b;
-      background-image: 
-        radial-gradient(hsla(34, 40%, 25%, 0.3) 15%, transparent 16%), 
-        radial-gradient(hsla(34, 40%, 25%, 0.3) 15%, transparent 16%),
-        url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.15'/%3E%3C/svg%3E");
-      background-size: 20px 20px, 20px 20px, 200px 200px;
-      background-position: 0 0, 10px 10px, 0 0;
-    }
-    
-    .mode-3 .img-box {
-      background: #fdfdfd;
-      padding: 12px 12px 50px 12px;
-      border: none;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.05), 3px 8px 20px rgba(0,0,0,0.2);
-      background-image: linear-gradient(to bottom right, #fff 0%, #f9f9f9 100%);
-    }
-
-    /* 3D PINS (Shared for Photos & Sticky Notes) */
-    .pin-handle {
-      position: absolute; top: -12px; left: 50%; width: 20px; height: 20px;
-      border-radius: 50%; transform: translateX(-50%);
-      z-index: 50; cursor: move; 
-      box-shadow: inset -3px -3px 5px rgba(0,0,0,0.3), inset 2px 2px 5px rgba(255,255,255,0.6), 2px 3px 5px rgba(0,0,0,0.3);
-      border: 1px solid rgba(0,0,0,0.1);
-    }
-    .mode-3 .pin-handle { display: block; }
-    
-    /* Pin Colors */
-    .pin-red { background-color: #ef4444; } .pin-blue { background-color: #3b82f6; }
-    .pin-green { background-color: #10b981; } .pin-yellow { background-color: #f59e0b; }
-    .pin-purple { background-color: #8b5cf6; }
-
-    .resize-handle { position: absolute; bottom: 0; left: 0; width: 100%; height: 50px; cursor: ns-resize; display: none; z-index: 40; }
-    .mode-3 .resize-handle { display: block; }
-
-    .media-container { width: 100%; height: 100%; overflow: hidden; position: relative; pointer-events: auto; cursor: pointer; box-shadow: inset 0 0 2px rgba(0,0,0,0.1); }
-    .mode-1 .media-container { cursor: default; }
-
-    .media-item { width: 100%; height: 100%; object-fit: contain; opacity: 0; transition: opacity 0.5s; pointer-events: none; }
-    .media-item.loaded { opacity: 1; }
-    .mode-3 .media-item { object-fit: cover; filter: sepia(0.05) contrast(1.05); }
-
-    /* KEN BURNS */
-    .ken-burns { animation: kenBurnsEffect 20s infinite alternate ease-in-out; }
-    @keyframes kenBurnsEffect { 0% { transform: scale(1.0); } 100% { transform: scale(1.15); } }
-
-    /* --- STICKY NOTE UI (Replaces Overlay) --- */
-    #overlay {
-      position: absolute; bottom: 0; left: 0; width: 100%; height: 100%; 
-      pointer-events: none; z-index: 100;
-    }
-    
-    #sticky-container {
-      position: absolute; bottom: 20px; left: 0; width: 100%;
-      padding: 0 20px; box-sizing: border-box;
-      display: flex; justify-content: space-between; align-items: flex-end;
-      gap: 15px; pointer-events: none;
-    }
-
-    /* Common Sticky Note Style */
-    .sticky-note {
-      position: relative;
-      padding: 15px;
-      box-shadow: 2px 4px 10px rgba(0,0,0,0.2);
-      pointer-events: auto; cursor: pointer;
-      font-family: 'Kalam', cursive;
-      color: #333;
-      transform-origin: center top;
-      transition: transform 0.2s;
-      min-width: 140px;
-    }
-    .sticky-note:active { transform: scale(0.98) !important; }
-    .sticky-note::after { /* Pin Shadow */ content:''; position:absolute; top:-5px; left:50%; width:6px; height:6px; background:rgba(0,0,0,0.3); border-radius:50%; transform:translateX(-50%); z-index:55; }
-
-    /* Specific Stickies */
-    #time-widget { 
-      background: var(--sticky-yellow); 
-      transform: rotate(-2deg); 
-      text-align: center;
-    }
-    #time { font-size: 2.8rem; font-weight: 700; line-height: 0.9; color: #1f2937; }
-    
-    #agenda-box { 
-      background: var(--sticky-pink); 
-      transform: rotate(1.5deg); 
-      display: flex; gap: 15px; text-align: center;
-    }
-    .day-col { display: flex; flex-direction: column; }
-    .day-label { font-size: 0.8rem; text-transform: uppercase; color: #666; font-weight: 700; }
-    .day-date { font-size: 1.4rem; font-weight: 700; line-height: 1; }
-    
-    #weather-box { 
-      background: var(--sticky-blue); 
-      transform: rotate(-1deg); 
-      text-align: right;
-      display: flex; flex-direction: column; align-items: flex-end;
-    }
-    #weather-main { display: flex; align-items: center; gap: 5px; }
-    #weather-icon { font-size: 32px; color: #2563eb; }
-    #temp { font-size: 2.2rem; font-weight: 700; line-height: 1; }
-    #condition { font-size: 0.9rem; font-weight: 600; text-transform: capitalize; }
-    #weather-details { font-size: 0.75rem; color: #555; margin-top: 4px; font-family: 'Inter', sans-serif; line-height: 1.2; text-align: right; max-width: 160px; }
-
-    /* The Tape Ticker */
-    #ticker-tape {
-      position: absolute; bottom: 80px; left: 50%; transform: translateX(-50%) rotate(0.5deg);
-      background: rgba(255,255,255,0.85);
-      border-left: 2px solid rgba(0,0,0,0.1); border-right: 2px solid rgba(0,0,0,0.1);
-      padding: 5px 40px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-      font-family: 'Permanent Marker', cursive;
-      font-size: 1rem; color: #444;
-      pointer-events: none;
-      white-space: nowrap;
-      z-index: 90;
-      mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
-      -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
-    }
-
-    /* Widget Pins */
-    .widget-pin {
-      position: absolute; top: -8px; left: 50%; transform: translateX(-50%);
-      width: 14px; height: 14px; border-radius: 50%;
-      box-shadow: inset -2px -2px 4px rgba(0,0,0,0.2), 1px 2px 3px rgba(0,0,0,0.3);
-      z-index: 60; border: 1px solid rgba(0,0,0,0.1);
-    }
-    .wp-red { background: #ef4444; }
-    .wp-green { background: #10b981; }
-    .wp-blue { background: #3b82f6; }
-
-    /* --- FULL CALENDAR IFRAME --- */
-    #calendar-modal {
-      position: absolute; bottom: -100%; left: 0; width: 100%; height: 95%;
-      background: #fff; 
-      transition: bottom 0.4s cubic-bezier(0.19, 1, 0.22, 1);
-      z-index: 160; border-top-left-radius: 24px; border-top-right-radius: 24px;
-      overflow: hidden; box-shadow: 0 -10px 50px rgba(0,0,0,0.5);
-    }
-    #calendar-modal.show { bottom: 0; }
-    .cal-header {
-      height: 60px; display: flex; justify-content: space-between; align-items: center;
-      padding: 0 25px; border-bottom: 1px solid #eee;
-      color: #333; font-weight: 700; font-size: 18px; 
-    }
-    .close-cal { cursor: pointer; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; background: #f3f4f6; border-radius: 50%; font-size: 18px; }
-
-    /* --- SETTINGS --- */
-    #settings-btn {
-      position: absolute; top: 30px; right: 30px; z-index: 250; /* Higher than panel! */
-      width: 48px; height: 48px; 
-      background: rgba(255,255,255,0.9); backdrop-filter: blur(10px);
-      border: 1px solid rgba(0,0,0,0.1); border-radius: 50%;
-      color: #333; display: flex; align-items: center; justify-content: center;
-      font-size: 24px; cursor: pointer; pointer-events: auto;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1); transition: transform 0.2s;
-    }
-    #settings-btn:active { transform: scale(0.9); }
-    
-    #settings-panel {
-      position: absolute; top: 0; right: -360px; width: 340px; height: 100%;
-      background: #111; color: #eee;
-      z-index: 200; transition: right 0.3s cubic-bezier(0.19, 1, 0.22, 1);
-      padding: 25px; box-sizing: border-box; border-left: 1px solid #333;
-      overflow-y: auto;
-    }
-    #settings-panel.open { right: 0; }
-    
-    /* New Settings Header */
-    .settings-header {
-        display: flex; justify-content: space-between; align-items: center;
-        margin-bottom: 30px; padding-bottom: 15px; border-bottom: 1px solid #333;
-    }
-    .settings-title { font-family: 'Permanent Marker', cursive; font-size: 1.5rem; color: #fff; }
-    .close-settings { 
-        cursor: pointer; width: 36px; height: 36px; 
-        background: #333; border-radius: 50%; 
-        display: flex; align-items: center; justify-content: center;
-        font-size: 18px; color: #fff; transition: background 0.2s;
-    }
-    .close-settings:hover { background: #444; }
-    
-    .setting-group { margin-bottom: 25px; padding-bottom: 20px; border-bottom: 1px solid #222; }
-    .setting-label { font-size: 0.8rem; color: #888; margin-bottom: 10px; display: block; text-transform: uppercase; letter-spacing: 1.5px; }
-    
-    .pro-btn {
-      display: block; width: 100%; padding: 14px; margin-bottom: 10px;
-      background: #252525; border: 1px solid #333; color: #eee; border-radius: 12px; 
-      text-align: left; cursor: pointer; font-weight: 500;
-      transition: all 0.2s;
-    }
-    .pro-btn:active { transform: scale(0.98); background: #333; }
-    .btn-primary { background: var(--accent-color); border: none; color: white; }
-    .btn-active { border: 1px solid var(--accent-color); color: var(--accent-color); background: rgba(59, 130, 246, 0.1); }
-    
-    .pro-select {
-      width: 100%; padding: 14px; background: #252525; border: 1px solid #333;
-      color: white; border-radius: 12px; font-size: 1rem; outline: none; margin-bottom: 12px;
-    }
-    
-    input[type=range] { width: 100%; margin: 10px 0; accent-color: var(--accent-color); }
-    #storage-status { font-size: 0.7rem; color: #888; margin-bottom: 10px; }
-
-  </style>
-</head>
-
-<body>
-  <input type="file" id="fileInput" webkitdirectory directory multiple style="display:none" />
-  <video id="wake-video" loop playsinline muted style="display:none"><source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4" /></video>
-
-  <div id="container">
-    <!-- Gear Icon (Z-Index increased) -->
-    <div id="settings-btn"><span class="material-symbols-rounded">settings</span></div>
-
-    <div id="settings-panel">
-      <!-- New Close Header -->
-      <div class="settings-header">
-          <div class="settings-title">Settings</div>
-          <div class="close-settings" id="btn-close-settings">✕</div>
-      </div>
-
-      <!-- Brightness -->
-      <div class="setting-group">
-        <span class="setting-label">Display</span>
-        <label style="font-size:0.9rem; color:#ccc; display:flex; justify-content:space-between;">
-          Brightness <span id="bright-val">100%</span>
-        </label>
-        <input type="range" id="brightness-slider" min="0.2" max="1" step="0.1" value="1">
-        <button id="btn-auto-bright" class="pro-btn">Auto-Dim (Night): OFF</button>
-      </div>
-
-      <!-- Source -->
-      <div class="setting-group">
-        <span class="setting-label">Media Source</span>
-        <button class="pro-btn btn-primary" id="btn-upload">+ Load Folder</button>
-        <div id="storage-status">Checking memory...</div>
-        <button class="pro-btn" id="btn-clear" style="background:#332222; color:#ff8888; font-size:0.8rem;">Clear Memory</button>
-      </div>
-
-      <!-- Controls -->
-      <div class="setting-group">
-        <span class="setting-label">Configuration</span>
-        <select id="timer-select" class="pro-select">
-          <option value="60000">1 Minute</option>
-          <option value="300000">5 Minutes</option>
-          <option value="600000">10 Minutes</option>
-          <option value="900000">15 Minutes</option>
-          <option value="1800000">30 Minutes</option>
-          <option value="2700000">45 Minutes</option>
-          <option value="3600000" selected>1 Hour</option>
-          <option value="10800000">3 Hours</option>
-          <option value="18000000">5 Hours</option>
-          <option value="static">Static</option>
-        </select>
-        
-        <button id="btn-rotate" class="pro-btn">Rotate Canvas (⟳)</button>
-        <button id="btn-layout" class="pro-btn">Layout: Single</button>
-        <button id="btn-auto-arrange" class="pro-btn">Auto-Arrange: OFF</button>
-        <button id="btn-shuffle" class="pro-btn">Shuffle: OFF</button>
-        <button id="btn-motion" class="pro-btn">Motion: OFF</button>
-        <button id="btn-fullscreen" class="pro-btn">Full Screen</button>
-        <button id="reset-btn" class="pro-btn" style="display:none;">Reset Pins</button>
-      </div>
-    </div>
-
-    <!-- Media Layer -->
-    <div id="photo-wrapper" class="mode-1">
-      <div id="box-1" class="img-box" style="top:10%; left:10%; width:280px;">
-        <div class="pin-handle"></div>
-        <div class="media-container" data-box="1"></div>
-        <div class="resize-handle"></div>
-      </div>
-      <div id="box-2" class="img-box" style="top:15%; left:50%; width:280px; display:none;">
-        <div class="pin-handle"></div>
-        <div class="media-container" data-box="2"></div>
-        <div class="resize-handle"></div>
-      </div>
-      <div id="box-3" class="img-box" style="top:50%; left:30%; width:280px; display:none;">
-        <div class="pin-handle"></div>
-        <div class="media-container" data-box="3"></div>
-        <div class="resize-handle"></div>
-      </div>
-    </div>
-
-    <!-- Sticky UI Layer -->
-    <div id="overlay">
-      <div id="ticker-tape">Loading Forecast...</div>
-      
-      <div id="sticky-container">
-        <!-- Time Note -->
-        <div id="time-widget" class="sticky-note">
-          <div class="widget-pin wp-red"></div>
-          <div id="time">00:00</div>
-        </div>
-
-        <!-- Agenda Note -->
-        <div id="agenda-box" class="sticky-note">
-          <div class="widget-pin wp-green"></div>
-          <div class="day-col">
-            <span class="day-label">Today</span>
-            <span class="day-date" id="date-today">--</span>
-          </div>
-          <div style="width:1px; background:#999;"></div>
-          <div class="day-col">
-            <span class="day-label">Tomrw</span>
-            <span class="day-date" id="date-tmrw">--</span>
-          </div>
-        </div>
-
-        <!-- Weather Note -->
-        <div id="weather-box" class="sticky-note">
-          <div class="widget-pin wp-blue"></div>
-          <div id="weather-main">
-            <div id="temp">--°</div>
-            <span class="material-symbols-rounded" id="weather-icon">wb_sunny</span>
-          </div>
-          <div id="condition">Loading</div>
-          <div id="weather-details">High --° Low --°</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Calendar Modal -->
-    <div id="calendar-modal">
-      <div class="cal-header">
-        <span>Calendar</span>
-        <div class="close-cal" id="btn-close-cal">✕</div>
-      </div>
-      <iframe
-        src="https://calendar.google.com/calendar/embed?src=runner4evs%40gmail.com&ctz=America%2FDenver&mode=MONTH&showTitle=0&showNav=1&showDate=1&showPrint=0&showTabs=0&showCalendars=0&bgcolor=%23ffffff"
-        style="border:0; width:100%; height:100%;"
-        frameborder="0"
-        scrolling="no">
-      </iframe>
-    </div>
-  </div>
-
-<script>
-  /* ---------------------------
-    State & DB (Unchanged)
-  --------------------------- */
-  const state = {
-    mediaItems: [], indices: [0, 1, 2], layoutMode: 1,
-    shuffleActive: false, motionActive: false, autoArrangeActive: false,
-    screenRotState: 0, userLat: 40.3769, userLon: -111.7958,
-    slideDuration: 3600000, timers: [null, null, null], timeouts: [null, null, null],
-    loadedRatios: { 1: 1, 2: 1, 3: 1 }, currentObjectUrls: { 1: null, 2: null, 3: null },
-    rafId: null, pinColors: ['pin-red', 'pin-blue', 'pin-green', 'pin-yellow', 'pin-purple'],
-    autoBright: false, manualBright: 1
-  };
-
-  const DB_NAME='FrameDB', STORE_NAME='mediaStore';
-  function initDB() { return new Promise((res, rej) => { const r = indexedDB.open(DB_NAME, 2); r.onerror=()=>rej(); r.onupgradeneeded=e=>{ const db=e.target.result; if(!db.objectStoreNames.contains(STORE_NAME)) db.createObjectStore(STORE_NAME, { keyPath:'id' }); }; r.onsuccess=e=>res(e.target.result); }); }
-  function makeFileId(f) { return `${f.webkitRelativePath||f.name}::${f.size}::${f.lastModified}`; }
-
-  /* ---------------------------
-    Batch Saving (The Fix)
-  --------------------------- */
-  async function saveFilesToDB(files) {
-    const status = document.getElementById('storage-status');
-    status.innerText = "Initializing...";
-    const db = await initDB();
-    const validFiles = Array.from(files).filter(f => f.type.match(/^(image|video)/));
-    const total = validFiles.length;
-    let processed = 0;
-    const CHUNK_SIZE = 50;
-    
-    const processChunk = async (startIndex) => {
-      if (startIndex >= total) { status.innerText = `${total} saved.`; loadFromDB(); return; }
-      const tx = db.transaction(STORE_NAME, 'readwrite');
-      const store = tx.objectStore(STORE_NAME);
-      const endIndex = Math.min(startIndex + CHUNK_SIZE, total);
-      for (let i = startIndex; i < endIndex; i++) {
-        const f = validFiles[i];
-        store.put({ id: makeFileId(f), type: f.type.startsWith('video')?'video':'image', file: f });
-      }
-      tx.oncomplete = () => { processed = endIndex; status.innerText = `Saving ${processed}/${total}...`; setTimeout(() => processChunk(endIndex), 10); };
-      tx.onerror = () => { status.innerText = "Error."; };
-    };
-    processChunk(0);
-  }
-
-  async function loadFromDB() {
-    try {
-      const db = await initDB(), tx = db.transaction(STORE_NAME, 'readonly'), req = tx.objectStore(STORE_NAME).getAll();
-      req.onsuccess = () => {
-        state.mediaItems = (req.result || []).map(r => ({ id:r.id, type:r.type, file:r.file }));
-        document.getElementById('storage-status').innerText = state.mediaItems.length ? `${state.mediaItems.length} Loaded.` : "Empty.";
-        refreshAll();
-      };
-    } catch (e) { document.getElementById('storage-status').innerText = "DB Error"; }
-  }
-
-  async function clearMemory() {
-    const db = await initDB(), tx = db.transaction(STORE_NAME, 'readwrite'); tx.objectStore(STORE_NAME).clear();
-    tx.oncomplete = () => { [1,2,3].forEach(revokeBoxUrl); state.mediaItems = []; refreshAll(); document.getElementById('storage-status').innerText = "Cleared."; };
-  }
-
-  /* ---------------------------
-    Helpers
-  --------------------------- */
-  function revokeBoxUrl(n) { if (state.currentObjectUrls[n]) { URL.revokeObjectURL(state.currentObjectUrls[n]); state.currentObjectUrls[n] = null; } }
-  function getItemUrl(n, item) { revokeBoxUrl(n); const u = URL.createObjectURL(item.file); state.currentObjectUrls[n] = u; return u; }
-  function getNextIdx(curr) {
-    const L = state.mediaItems.length; if (!L) return 0;
-    if (state.shuffleActive) { if (L===1) return 0; let next; do { next=Math.floor(Math.random()*L); } while (next===curr); return next; }
-    return (curr + 1) % L;
-  }
-
-  function renderBox(n, idx) {
-    const box = document.getElementById('box-'+n), con = box.querySelector('.media-container'); con.innerHTML = '';
-    if (!state.mediaItems || !state.mediaItems.length) return;
-    if (!state.mediaItems[idx]) idx = 0;
-    const item = state.mediaItems[idx], el = document.createElement(item.type==='video'?'video':'img');
-    el.className = 'media-item';
-    if (state.motionActive && item.type==='image' && !document.hidden) el.classList.add('ken-burns');
-
-    const pin = box.querySelector('.pin-handle');
-    if (pin) {
-      let savedColor = null;
-      try { const d = JSON.parse(localStorage.getItem('cork_layout')); if (d && d[n] && d[n].pin) savedColor = d[n].pin; } catch(e){}
-      if (!savedColor) savedColor = state.pinColors[Math.floor(Math.random()*state.pinColors.length)];
-      pin.className = 'pin-handle ' + savedColor;
-      if(state.layoutMode === 3) saveCork(); 
-    }
-
-    const onLoad = () => {
-      el.classList.add('loaded');
-      const r = item.type==='video' ? (el.videoWidth ? el.videoHeight/el.videoWidth : 1) : (el.naturalWidth ? el.naturalHeight/el.naturalWidth : 1);
-      state.loadedRatios[n] = r || 1;
-      if (state.layoutMode === 3) {
-        if (state.autoArrangeActive) applySmartLayout();
-        else { const w = parseInt(box.style.width)||280; box.style.height = (w*(r||1)+50)+'px'; }
-        saveCork();
-      }
-    };
-    if (item.type==='video') { el.loop=true; el.muted=true; el.autoplay=true; el.playsInline=true; el.oncanplay=onLoad; } else el.onload=onLoad;
-    el.src = getItemUrl(n, item); con.appendChild(el);
-  }
-
-  function refreshAll() {
-    document.getElementById('photo-wrapper').className = 'mode-' + state.layoutMode;
-    document.getElementById('reset-btn').style.display = (state.layoutMode === 3) ? 'block' : 'none';
-    
-    // Toggle Sticky Visibility based on mode
-    const sticky = document.getElementById('sticky-container');
-    const ticker = document.getElementById('ticker-tape');
-    if(state.layoutMode === 1) { sticky.style.opacity = '0'; ticker.style.opacity = '0'; }
-    else { sticky.style.opacity = '1'; ticker.style.opacity = '1'; }
-
-    renderBox(1, state.indices[0]);
-    const b2=document.getElementById('box-2'), b3=document.getElementById('box-3');
-    if (state.layoutMode >= 2) { b2.style.display='flex'; renderBox(2, state.indices[1]); } else { b2.style.display='none'; revokeBoxUrl(2); }
-    if (state.layoutMode === 3) { b3.style.display='flex'; renderBox(3, state.indices[2]); loadCork(); } else { b3.style.display='none'; revokeBoxUrl(3); }
-    updateTimer(document.getElementById('timer-select').value);
-  }
-
-  function updateTimer(val) {
-    state.timers.forEach(t => t && clearInterval(t)); state.timeouts.forEach(t => t && clearTimeout(t));
-    state.timers = [null,null,null]; state.timeouts = [null,null,null];
-    if (val === 'static') return;
-    const dur = parseInt(val, 10);
-    const tick = (n, i) => { if (state.mediaItems.length) { state.indices[i] = getNextIdx(state.indices[i]); renderBox(n, state.indices[i]); } };
-    state.timers[0] = setInterval(() => tick(1,0), dur);
-    if (state.layoutMode >= 2) state.timeouts[1] = setTimeout(() => { tick(2,1); state.timers[1] = setInterval(() => tick(2,1), dur); }, dur/3);
-    if (state.layoutMode === 3) state.timeouts[2] = setTimeout(() => { tick(3,2); state.timers[2] = setInterval(() => tick(3,2), dur); }, (dur/3)*2);
-  }
-
-  /* ---------------------------
-    Weather Logic
-  --------------------------- */
-  const icons = { 0:'wb_sunny', 1:'wb_sunny', 2:'partly_cloudy_day', 3:'cloud', 45:'foggy', 51:'rainy', 61:'rainy', 63:'rainy', 71:'ac_unit', 80:'rainy', 95:'thunderstorm' };
-  function weatherLabel(code) { const map = { 0:'Clear', 1:'Fair', 2:'Partly Cloudy', 3:'Cloudy', 45:'Fog', 51:'Drizzle', 61:'Rain', 71:'Snow', 95:'Storm' }; return map[code]||'Weather'; }
-
-  async function updateWeather() {
-    try {
-      const r = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${state.userLat}&longitude=${state.userLon}&current_weather=true&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max&temperature_unit=fahrenheit&timezone=auto`);
-      const d = await r.json(); if(!d.current_weather) return;
-      const t = Math.round(d.current_weather.temperature), c = d.current_weather.weathercode, night = d.current_weather.is_day===0;
-      
-      document.getElementById('temp').innerText = t + "°";
-      document.getElementById('condition').innerText = (night && c<=2) ? "Clear Night" : weatherLabel(c);
-      document.getElementById('weather-icon').innerText = (night && c<=2) ? 'bedtime' : (icons[c]||'cloud');
-      
-      const hi = Math.round(d.daily.temperature_2m_max[0]), lo = Math.round(d.daily.temperature_2m_min[0]), precip = d.daily.precipitation_probability_max[0];
-      document.getElementById('weather-details').innerText = `High ${hi}° Low ${lo}°`;
-      
-      const msg = `Today: ${hi}°/${lo}°. ` + (precip > 30 ? `Precipitation: ${precip}%.` : `Enjoy the view.`);
-      document.getElementById('ticker-tape').innerText = msg;
-    } catch(e) {}
-  }
-
-  function checkBrightness() {
-    const h = new Date().getHours(), night = h >= 22 || h < 7;
-    document.body.style.filter = `brightness(${state.autoBright && night ? 0.4 : state.manualBright})`;
-  }
-
-  /* ---------------------------
-    UI Binding
-  --------------------------- */
-  function bindUI() {
-    const click = (id, fn) => document.getElementById(id).addEventListener('click', fn);
-    click('settings-btn', () => document.getElementById('settings-panel').classList.toggle('open'));
-    // New Close Button
-    click('btn-close-settings', () => document.getElementById('settings-panel').classList.remove('open'));
-    
-    click('time-widget', () => document.getElementById('settings-panel').classList.toggle('open'));
-    click('agenda-box', () => document.getElementById('calendar-modal').classList.toggle('show'));
-    click('btn-close-cal', () => document.getElementById('calendar-modal').classList.toggle('show'));
-    click('btn-upload', () => document.getElementById('fileInput').click());
-    click('btn-clear', clearMemory);
-    click('btn-layout', () => { state.layoutMode = (state.layoutMode % 3) + 1; refreshAll(); document.getElementById('btn-layout').innerText="Layout: "+["Single","Staggered","Corkboard"][state.layoutMode-1]; });
-    click('btn-shuffle', () => { state.shuffleActive = !state.shuffleActive; document.getElementById('btn-shuffle').classList.toggle('btn-active'); });
-    click('btn-motion', () => { state.motionActive = !state.motionActive; document.getElementById('btn-motion').classList.toggle('btn-active'); refreshAll(); });
-    click('btn-auto-arrange', () => { state.autoArrangeActive = !state.autoArrangeActive; document.getElementById('btn-auto-arrange').classList.toggle('btn-active'); if(state.autoArrangeActive) applySmartLayout(); });
-    click('btn-rotate', () => { state.screenRotState = (state.screenRotState + 1) % 4; applyRot(); });
-    click('btn-fullscreen', () => { if(!document.fullscreenElement) document.documentElement.requestFullscreen(); else document.exitFullscreen(); });
-    click('reset-btn', () => { localStorage.removeItem('cork_layout'); refreshAll(); });
-    click('btn-auto-bright', () => { state.autoBright = !state.autoBright; document.getElementById('btn-auto-bright').classList.toggle('btn-active'); checkBrightness(); });
-    
-    document.getElementById('brightness-slider').addEventListener('input', (e) => { state.manualBright = parseFloat(e.target.value); document.getElementById('bright-val').innerText = Math.round(state.manualBright*100)+'%'; checkBrightness(); });
-    document.getElementById('timer-select').addEventListener('change', (e) => updateTimer(e.target.value));
-    document.getElementById('fileInput').addEventListener('change', function() { if(this.files.length) saveFilesToDB(this.files); });
-    
-    document.querySelectorAll('.media-container').forEach(mc => { mc.addEventListener('click', () => { const n = parseInt(mc.dataset.box); if(!state.mediaItems.length) return; state.indices[n-1] = getNextIdx(state.indices[n-1]); renderBox(n, state.indices[n-1]); }); });
-  }
-
-  function applyRot() {
-    const c = document.getElementById('container'), d = state.screenRotState * 90, w = window.innerWidth, h = window.innerHeight;
-    c.style.transform = (d===0) ? 'none' : (d===180 ? 'rotate(180deg)' : `translate(${(w-h)/2}px, ${(h-w)/2}px) rotate(${d}deg)`);
-    setTimeout(applySmartLayout, 200);
-  }
-
-  /* ---------------------------
-    Smart Layout & Drag
-  --------------------------- */
-  function applySmartLayout() {
-    if (state.layoutMode !== 3 || !state.autoArrangeActive) return;
-    const w = window.innerWidth, H = window.innerHeight;
-    const r = [1,2,3].map(i => state.loadedRatios[i]||1), p = r.filter(x => x > 0.95).length;
-    // PADDED BOTTOM to avoid sticky notes (approx 150px safe zone)
-    const set = (i, t, l, wid) => {
-      const b = document.getElementById('box-'+i);
-      b.style.top = t; b.style.left = l; b.style.width = wid + 'px';
-      b.style.height = (wid * (state.loadedRatios[i]||1) + 50) + 'px';
-      b.style.transform = `rotate(${(Math.random()*6-3).toFixed(1)}deg)`;
-    };
-    if (p === 3) { const wd=w/3.4; set(1,'10%','3%',wd); set(2,'10%','35%',wd); set(3,'10%','68%',wd); }
-    else if (p === 0) { const wd=w/2.6; set(1,'5%','5%',wd); set(2,'5%','55%',wd); set(3,'40%','30%',wd); }
-    else { const wp=w/4, wl=w/2.8; set(1,'10%','5%',wp); set(2,'10%','75%',wp); set(3,'30%','30%',wl); }
-    saveCork();
-  }
-
-  function saveCork() { if (state.layoutMode!==3) return; const d={}; [1,2,3].forEach(i=>{ const b=document.getElementById('box-'+i), p=b.querySelector('.pin-handle'); let c=''; if(p) state.pinColors.forEach(pc=>{if(p.classList.contains(pc))c=pc;}); d[i]={t:b.style.top, l:b.style.left, w:b.style.width, h:b.style.height, r:b.style.transform, pin:c}; }); localStorage.setItem('cork_layout', JSON.stringify(d)); }
-  function loadCork() { try{ const d=JSON.parse(localStorage.getItem('cork_layout')); if(d) [1,2,3].forEach(i=>{ if(d[i]){ const b=document.getElementById('box-'+i); b.style.top=d[i].t; b.style.left=d[i].l; b.style.width=d[i].w; b.style.height=d[i].h; b.style.transform=d[i].r; if(d[i].pin){const p=b.querySelector('.pin-handle'); if(p) p.className='pin-handle '+d[i].pin;} } }); }catch(e){} }
-
-  let drag = { el:null, res:false, down:false, sx:0, sy:0, sw:0, st:0, sl:0 };
-  document.addEventListener('pointerdown', e => {
-    const p = e.target.closest('.pin-handle'), r = e.target.closest('.resize-handle');
-    if (state.layoutMode !== 3 || (!p && !r)) return;
-    drag.el = p ? p.parentElement : r.parentElement; drag.res = !!r; drag.down = true;
-    drag.sx = e.clientX; drag.sy = e.clientY; drag.sw = drag.el.offsetWidth; drag.st = drag.el.offsetTop; drag.sl = drag.el.offsetLeft;
-    drag.el.style.zIndex = 1000;
-    if (state.autoArrangeActive) { state.autoArrangeActive=false; document.getElementById('btn-auto-arrange').classList.remove('btn-active'); }
-    e.preventDefault();
-  });
-  document.addEventListener('pointermove', e => {
-    if (!drag.down || !drag.el) return;
-    const dx = e.clientX - drag.sx, dy = e.clientY - drag.sy;
-    if (drag.res) { const nw = Math.max(150, drag.sw + dx); drag.el.style.width = nw + 'px'; const bn = parseInt(drag.el.querySelector('.media-container').dataset.box); drag.el.style.height = (nw * (state.loadedRatios[bn]||1) + 50) + 'px'; }
-    else { drag.el.style.left = (drag.sl + dx) + 'px'; drag.el.style.top = (drag.st + dy) + 'px'; }
-  });
-  document.addEventListener('pointerup', () => { if(drag.el){ drag.el.style.zIndex=''; saveCork(); } drag.el=null; drag.down=false; });
-
-  function tick() {
-    const n = new Date(), t = new Date(n); t.setDate(n.getDate()+1);
-    document.getElementById('time').innerText = n.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
-    document.getElementById('date-today').innerText = n.toLocaleDateString([], {weekday:'short', day:'numeric'});
-    document.getElementById('date-tmrw').innerText = t.toLocaleDateString([], {weekday:'short', day:'numeric'});
-    if(state.autoBright) checkBrightness();
-  }
-
-  initDB(); bindUI(); loadFromDB(); setInterval(tick, 1000); updateWeather(); setInterval(updateWeather, 900000); tick();
-</script>
-</body>
-</html>
-
-
