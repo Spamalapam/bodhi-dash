@@ -88,36 +88,60 @@
 
     /* --- MODE 3: Realistic Corkboard --- */
     .mode-3 {
-      background-color: #9e7e56;
+      background-color: #a0845c;
       background-image:
-        /* Subtle lighting — warm top-left highlight, darker bottom-right */
-        radial-gradient(ellipse at 15% 20%, rgba(195, 170, 130, 0.35) 0%, transparent 55%),
-        radial-gradient(ellipse at 85% 85%, rgba(80, 55, 30, 0.25) 0%, transparent 50%),
-        radial-gradient(ellipse at 50% 50%, rgba(160, 130, 85, 0.15) 0%, transparent 70%),
-        /* Fine grain — tiny dense noise like real cork fiber */
-        url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='a'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.8' numOctaves='6' stitchTiles='stitch' seed='2'/%3E%3CfeColorMatrix type='saturate' values='0.1'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23a)' opacity='0.18'/%3E%3C/svg%3E"),
-        /* Medium grain — irregular porous patches */
-        url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='b'%3E%3CfeTurbulence type='turbulence' baseFrequency='0.35' numOctaves='3' stitchTiles='stitch' seed='7'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23b)' opacity='0.09'/%3E%3C/svg%3E"),
-        /* Coarse grain — large-scale tonal variation like real cork sheets */
-        url("data:image/svg+xml,%3Csvg viewBox='0 0 300 300' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='c'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.08' numOctaves='2' stitchTiles='stitch' seed='12'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23c)' opacity='0.07'/%3E%3C/svg%3E");
-      background-size: cover, cover, cover, 512px 512px, 400px 400px, 300px 300px;
-      /* Thin wood frame edge effect */
-      box-shadow: inset 0 0 0 6px rgba(60, 40, 20, 0.35), inset 0 0 30px rgba(60, 40, 20, 0.15);
+        /* Warm highlight top-left */
+        radial-gradient(ellipse at 10% 15%, rgba(210, 185, 145, 0.5) 0%, transparent 45%),
+        /* Dark shadow bottom-right */
+        radial-gradient(ellipse at 90% 90%, rgba(60, 40, 20, 0.3) 0%, transparent 45%),
+        /* Center warmth */
+        radial-gradient(ellipse at 50% 45%, rgba(180, 155, 110, 0.2) 0%, transparent 60%),
+        /* Cork pore layer 1 - tiny dark spots scattered */
+        radial-gradient(circle at 12% 8%, rgba(70,50,25,0.25) 0.5px, transparent 1.2px),
+        radial-gradient(circle at 35% 22%, rgba(80,55,30,0.2) 0.8px, transparent 1.5px),
+        radial-gradient(circle at 58% 15%, rgba(65,45,20,0.22) 0.6px, transparent 1.3px),
+        radial-gradient(circle at 82% 28%, rgba(75,50,25,0.2) 0.7px, transparent 1.4px),
+        radial-gradient(circle at 20% 42%, rgba(85,60,30,0.18) 0.5px, transparent 1.2px),
+        radial-gradient(circle at 45% 38%, rgba(70,48,22,0.22) 0.8px, transparent 1.5px),
+        radial-gradient(circle at 68% 45%, rgba(60,40,20,0.2) 0.6px, transparent 1.3px),
+        radial-gradient(circle at 92% 52%, rgba(80,55,28,0.18) 0.7px, transparent 1.4px),
+        radial-gradient(circle at 8% 62%, rgba(75,52,25,0.22) 0.5px, transparent 1.1px),
+        radial-gradient(circle at 30% 58%, rgba(65,45,20,0.2) 0.8px, transparent 1.5px),
+        radial-gradient(circle at 55% 68%, rgba(85,60,30,0.18) 0.6px, transparent 1.2px),
+        radial-gradient(circle at 78% 72%, rgba(70,48,22,0.22) 0.7px, transparent 1.4px),
+        radial-gradient(circle at 15% 82%, rgba(80,55,28,0.2) 0.5px, transparent 1.2px),
+        radial-gradient(circle at 42% 78%, rgba(60,40,18,0.22) 0.8px, transparent 1.5px),
+        radial-gradient(circle at 65% 88%, rgba(75,52,25,0.18) 0.6px, transparent 1.3px),
+        radial-gradient(circle at 88% 85%, rgba(85,58,30,0.2) 0.7px, transparent 1.4px),
+        /* Cork pore layer 2 — lighter tan spots (lighter fibers) */
+        radial-gradient(circle at 22% 18%, rgba(200,175,130,0.25) 1px, transparent 2.5px),
+        radial-gradient(circle at 48% 32%, rgba(195,170,125,0.2) 1.2px, transparent 3px),
+        radial-gradient(circle at 72% 22%, rgba(210,180,135,0.22) 1px, transparent 2.8px),
+        radial-gradient(circle at 18% 55%, rgba(200,172,128,0.2) 1.3px, transparent 3px),
+        radial-gradient(circle at 52% 62%, rgba(190,165,120,0.22) 1px, transparent 2.5px),
+        radial-gradient(circle at 85% 48%, rgba(205,178,132,0.18) 1.2px, transparent 3px),
+        radial-gradient(circle at 38% 82%, rgba(195,168,122,0.22) 1px, transparent 2.8px),
+        radial-gradient(circle at 75% 78%, rgba(210,182,138,0.2) 1.3px, transparent 3px),
+        /* Large tonal variation patches */
+        radial-gradient(ellipse at 25% 35%, rgba(120,90,55,0.12) 0%, transparent 25%),
+        radial-gradient(ellipse at 70% 60%, rgba(140,110,70,0.1) 0%, transparent 30%),
+        radial-gradient(ellipse at 50% 80%, rgba(110,85,50,0.08) 0%, transparent 20%),
+        radial-gradient(ellipse at 80% 20%, rgba(130,100,65,0.1) 0%, transparent 22%);
+      /* Wood frame edge */
+      box-shadow:
+        inset 0 0 0 5px rgba(55, 35, 15, 0.35),
+        inset 0 0 0 6px rgba(120, 90, 50, 0.15),
+        inset 0 0 25px rgba(50, 30, 10, 0.12);
     }
 
     .mode-3 .img-box {
-      background: linear-gradient(160deg, #fffffe 0%, #f8f7f2 40%, #f5f3ed 100%);
+      background: linear-gradient(160deg, #fffffe 0%, #faf9f5 30%, #f5f3ed 100%);
       padding: 10px 10px 42px 10px;
       box-shadow:
-        0 1px 2px rgba(0,0,0,0.06),
+        0 1px 2px rgba(0,0,0,0.08),
         1px 3px 8px rgba(0,0,0,0.1),
         3px 8px 20px rgba(0,0,0,0.14),
         6px 16px 36px rgba(0,0,0,0.08);
-      /* Subtle paper grain */
-      background-image:
-        linear-gradient(160deg, rgba(255,255,255,0.6) 0%, transparent 30%),
-        url("data:image/svg+xml,%3Csvg viewBox='0 0 128 128' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='2.5' numOctaves='3' stitchTiles='stitch' seed='5'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23p)' opacity='0.03'/%3E%3C/svg%3E");
-      background-size: cover, 128px 128px;
     }
 
     /* Pins */
@@ -223,28 +247,27 @@
     }
 
     #sticky-container {
-      position: absolute; bottom: 16px; left: 0; width: 100%;
-      padding: 0 20px; box-sizing: border-box;
+      position: absolute; bottom: 12px; left: 0; width: 100%;
+      padding: 0 16px; box-sizing: border-box;
       display: flex; justify-content: space-between; align-items: flex-end;
-      gap: 16px; pointer-events: none;
+      gap: 12px; pointer-events: none;
       transition: opacity 0.4s, transform 0.4s;
     }
     #sticky-container.hidden { opacity: 0; transform: translateY(20px); pointer-events: none; }
 
     .sticky-note {
-      position: relative; padding: 16px 18px;
+      position: relative; padding: 18px 22px;
       pointer-events: auto; cursor: pointer;
       font-family: 'Kalam', cursive; color: #2a2a2a;
       transform-origin: center bottom;
       transition: transform 0.2s;
       /* 3D depth: layered shadows for lifted paper effect */
       box-shadow:
-        0 1px 1px rgba(0,0,0,0.06),
-        0 2px 4px rgba(0,0,0,0.08),
-        0 6px 12px rgba(0,0,0,0.12),
-        0 14px 28px rgba(0,0,0,0.10),
-        /* Bottom-right curl shadow */
-        3px 3px 6px rgba(0,0,0,0.08);
+        0 1px 1px rgba(0,0,0,0.08),
+        0 3px 6px rgba(0,0,0,0.1),
+        0 8px 16px rgba(0,0,0,0.12),
+        0 16px 32px rgba(0,0,0,0.08),
+        3px 4px 8px rgba(0,0,0,0.06);
       /* Slight paper texture gradient */
       background-image: linear-gradient(135deg, rgba(255,255,255,0.4) 0%, transparent 40%, transparent 60%, rgba(0,0,0,0.02) 100%);
       background-blend-mode: overlay;
@@ -267,8 +290,8 @@
     .sticky-note:active { transform: scale(0.97) !important; }
 
     .widget-pin {
-      position: absolute; top: -8px; left: 50%; transform: translateX(-50%);
-      width: 14px; height: 14px; border-radius: 50%;
+      position: absolute; top: -9px; left: 50%; transform: translateX(-50%);
+      width: 16px; height: 16px; border-radius: 50%;
       box-shadow:
         inset -2px -2px 3px rgba(0,0,0,0.3),
         inset 1px 1px 2px rgba(255,255,255,0.4),
@@ -286,16 +309,16 @@
       background: #fefce8;
       background-image: linear-gradient(135deg, rgba(255,255,255,0.5) 0%, transparent 40%, transparent 60%, rgba(0,0,0,0.02) 100%);
       transform: rotate(-1.8deg);
-      text-align: center; min-width: 130px;
+      text-align: center; min-width: 170px;
     }
     #time-display {
-      font-size: 2.6rem; font-weight: 700; line-height: 1;
+      font-size: 3.6rem; font-weight: 700; line-height: 1;
       color: #1a1a1a; letter-spacing: -1px;
       font-family: 'Kalam', cursive;
     }
-    #ampm { font-size: 0.75rem; font-weight: 400; color: #777; margin-left: 2px; font-family: 'Kalam', cursive; }
+    #ampm { font-size: 1rem; font-weight: 400; color: #777; margin-left: 3px; font-family: 'Kalam', cursive; }
     #date-line {
-      font-size: 0.72rem; color: #666; margin-top: 5px;
+      font-size: 1rem; color: #555; margin-top: 6px;
       font-family: 'Kalam', cursive; font-weight: 400;
     }
 
@@ -304,13 +327,13 @@
       background: #fce7f3;
       background-image: linear-gradient(135deg, rgba(255,255,255,0.45) 0%, transparent 40%, transparent 60%, rgba(0,0,0,0.02) 100%);
       transform: rotate(1.2deg);
-      display: flex; gap: 14px; text-align: center;
+      display: flex; gap: 18px; text-align: center;
     }
-    .day-col { display: flex; flex-direction: column; gap: 2px; }
-    .day-label { font-size: 0.62rem; text-transform: uppercase; color: #888; font-weight: 700; letter-spacing: 0.5px; font-family: 'Kalam', cursive; }
-    .day-date { font-size: 1.5rem; font-weight: 700; line-height: 1; color: #2a2a2a; font-family: 'Kalam', cursive; }
-    .day-sub { font-size: 0.62rem; color: #888; font-family: 'Kalam', cursive; }
-    .day-divider { width: 1px; background: rgba(0,0,0,0.1); align-self: stretch; margin: 4px 0; }
+    .day-col { display: flex; flex-direction: column; gap: 3px; }
+    .day-label { font-size: 0.85rem; text-transform: uppercase; color: #888; font-weight: 700; letter-spacing: 0.5px; font-family: 'Kalam', cursive; }
+    .day-date { font-size: 2.2rem; font-weight: 700; line-height: 1; color: #2a2a2a; font-family: 'Kalam', cursive; }
+    .day-sub { font-size: 0.85rem; color: #777; font-family: 'Kalam', cursive; }
+    .day-divider { width: 1px; background: rgba(0,0,0,0.12); align-self: stretch; margin: 4px 0; }
 
     /* Weather Widget — expanded to absorb ticker data */
     #weather-box {
@@ -318,24 +341,24 @@
       background-image: linear-gradient(135deg, rgba(255,255,255,0.5) 0%, transparent 40%, transparent 60%, rgba(0,0,0,0.02) 100%);
       transform: rotate(-0.8deg);
       display: flex; flex-direction: column; align-items: flex-end;
-      min-width: 175px; max-width: 220px;
+      min-width: 210px;
       text-align: right;
     }
-    #weather-main { display: flex; align-items: center; gap: 6px; }
-    #weather-icon { font-size: 28px; color: #0369a1; }
-    #temp { font-size: 2.2rem; font-weight: 700; line-height: 1; color: #1a1a1a; font-family: 'Kalam', cursive; }
-    #condition { font-size: 0.78rem; font-weight: 600; text-transform: capitalize; color: #3a3a3a; font-family: 'Kalam', cursive; }
+    #weather-main { display: flex; align-items: center; gap: 8px; }
+    #weather-icon { font-size: 36px; color: #0369a1; }
+    #temp { font-size: 3.2rem; font-weight: 700; line-height: 1; color: #1a1a1a; font-family: 'Kalam', cursive; }
+    #condition { font-size: 1.05rem; font-weight: 600; text-transform: capitalize; color: #3a3a3a; font-family: 'Kalam', cursive; }
     #weather-details {
-      font-size: 0.62rem; color: #555; margin-top: 4px;
+      font-size: 0.85rem; color: #555; margin-top: 5px;
       font-family: 'Kalam', cursive; line-height: 1.45;
       text-align: right;
     }
     #weather-tomorrow {
-      font-size: 0.58rem; color: #777; margin-top: 3px;
+      font-size: 0.8rem; color: #666; margin-top: 4px;
       font-family: 'Kalam', cursive; line-height: 1.3;
       text-align: right;
-      border-top: 1px dashed rgba(0,0,0,0.1);
-      padding-top: 3px;
+      border-top: 1px dashed rgba(0,0,0,0.12);
+      padding-top: 4px;
     }
 
     /* Ticker tape removed — weather info condensed into sticky */
@@ -1014,135 +1037,161 @@ function applySmartLayout() {
 
   const W = window.innerWidth;
   const H = window.innerHeight;
-  const PAD_TOP = 16;
-  const PAD_BOTTOM = 110; // Space for sticky notes only (ticker removed)
-  const PAD_SIDE = 16;
-  const POLAROID_BOTTOM = 52; // Padding below photo in polaroid frame
-  const GAP = 14;
+  const PAD_TOP = 12;
+  const PAD_BOTTOM = 150; // Bigger sticky notes need more room
+  const PAD_SIDE = 14;
+  const PB = 52; // Polaroid padding (10px top + 42px bottom)
+  const GAP = 12;
 
   const usableW = W - PAD_SIDE * 2;
   const usableH = H - PAD_TOP - PAD_BOTTOM;
 
   const ratios = [S.loadedRatios[1] || 1, S.loadedRatios[2] || 1, S.loadedRatios[3] || 1];
 
-  // For each photo: given width w, total box height = w * ratio + POLAROID_BOTTOM
-  // We want to maximize total photo area while fitting all 3 on screen.
-
-  // Strategy: Try side-by-side (3 columns) first, then try 2+1 arrangements
-  // Pick whichever gives the most total photo area.
-
+  // boxH(w, r) = w * r + PB
+  // photoArea(w, r) = w * w * r
   const layouts = [];
+
+  // Helper: compute a layout variant and push it
+  function tryLayout(positions) {
+    let totalArea = 0;
+    let valid = true;
+    for (let i = 0; i < 3; i++) {
+      const p = positions[i];
+      if (!p || p.w < 100) { valid = false; break; }
+      totalArea += p.w * p.w * ratios[i];
+    }
+    if (valid) layouts.push({ area: totalArea, positions });
+  }
+
+  // Clamp width so box doesn't overflow usable height
+  function maxW(r) { return Math.floor((usableH - PB) / Math.max(0.3, r)); }
 
   // --- LAYOUT A: 3 columns side by side ---
   {
-    const colW = Math.floor((usableW - GAP * 2) / 3);
-    const heights = ratios.map((r, i) => colW * r + POLAROID_BOTTOM);
-    const maxH = Math.max(...heights);
-    let finalW = colW;
-    if (maxH > usableH) {
-      // Scale down to fit tallest
-      const scale = usableH / maxH;
-      finalW = Math.floor(colW * scale);
-    }
-    const totalArea = ratios.reduce((sum, r) => sum + finalW * (finalW * r), 0);
-    const positions = [0, 1, 2].map((i) => {
-      const bh = finalW * ratios[i] + POLAROID_BOTTOM;
+    let colW = Math.floor((usableW - GAP * 2) / 3);
+    // Clamp by tallest
+    for (let i = 0; i < 3; i++) colW = Math.min(colW, maxW(ratios[i]));
+    const positions = [0, 1, 2].map(i => {
+      const bh = colW * ratios[i] + PB;
       return {
-        x: PAD_SIDE + i * (finalW + GAP),
+        x: PAD_SIDE + i * (colW + GAP),
         y: PAD_TOP + Math.floor((usableH - bh) * 0.35),
-        w: finalW
+        w: colW
       };
     });
-    layouts.push({ area: totalArea, positions, label: 'columns' });
+    tryLayout(positions);
   }
 
-  // --- LAYOUT B: 1 big + 2 stacked (big on left) ---
+  // --- LAYOUT B/C: 1 big + 2 stacked (try both sides, all 3 as "big") ---
   for (const bigIdx of [0, 1, 2]) {
     const others = [0, 1, 2].filter(i => i !== bigIdx);
-    // Big takes ~55% width, small takes ~42%
-    const bigW = Math.floor(usableW * 0.56 - GAP / 2);
-    const smallW = Math.floor(usableW * 0.44 - GAP / 2);
 
-    const bigH = bigW * ratios[bigIdx] + POLAROID_BOTTOM;
-    let scaledBigW = bigW;
-    if (bigH > usableH) {
-      scaledBigW = Math.floor((usableH - POLAROID_BOTTOM) / ratios[bigIdx]);
+    // Try different split ratios for better fit
+    for (const bigFrac of [0.52, 0.58, 0.64]) {
+      const smallFrac = 1 - bigFrac;
+
+      for (const bigOnLeft of [true, false]) {
+        let bW = Math.floor(usableW * bigFrac - GAP / 2);
+        let sW = Math.floor(usableW * smallFrac - GAP / 2);
+
+        // Clamp big to fit height
+        bW = Math.min(bW, maxW(ratios[bigIdx]));
+
+        // Clamp smalls so they stack within height
+        const stackH = () => sW * ratios[others[0]] + PB + GAP + sW * ratios[others[1]] + PB;
+        if (stackH() > usableH) {
+          sW = Math.floor((usableH - PB * 2 - GAP) / (ratios[others[0]] + ratios[others[1]]));
+        }
+        sW = Math.max(sW, 100);
+
+        const bigH = bW * ratios[bigIdx] + PB;
+        const s0H = sW * ratios[others[0]] + PB;
+        const s1H = sW * ratios[others[1]] + PB;
+
+        const bigY = PAD_TOP + Math.max(0, Math.floor((usableH - bigH) * 0.3));
+        const stackTotalH = s0H + GAP + s1H;
+        const sStartY = PAD_TOP + Math.max(0, Math.floor((usableH - stackTotalH) * 0.3));
+
+        const positions = [];
+        if (bigOnLeft) {
+          positions[bigIdx] = { x: PAD_SIDE, y: bigY, w: bW };
+          positions[others[0]] = { x: PAD_SIDE + bW + GAP, y: sStartY, w: sW };
+          positions[others[1]] = { x: PAD_SIDE + bW + GAP, y: sStartY + s0H + GAP, w: sW };
+        } else {
+          positions[bigIdx] = { x: PAD_SIDE + sW + GAP, y: bigY, w: bW };
+          positions[others[0]] = { x: PAD_SIDE, y: sStartY, w: sW };
+          positions[others[1]] = { x: PAD_SIDE, y: sStartY + s0H + GAP, w: sW };
+        }
+        tryLayout(positions);
+      }
     }
-    const actualBigH = scaledBigW * ratios[bigIdx] + POLAROID_BOTTOM;
-
-    // Stack two small ones vertically
-    const s0H = smallW * ratios[others[0]] + POLAROID_BOTTOM;
-    const s1H = smallW * ratios[others[1]] + POLAROID_BOTTOM;
-    const stackH = s0H + s1H + GAP;
-    let scaledSmallW = smallW;
-    if (stackH > usableH) {
-      const scale = usableH / stackH;
-      scaledSmallW = Math.floor(smallW * scale);
-    }
-    const as0H = scaledSmallW * ratios[others[0]] + POLAROID_BOTTOM;
-    const as1H = scaledSmallW * ratios[others[1]] + POLAROID_BOTTOM;
-
-    const totalArea = scaledBigW * (scaledBigW * ratios[bigIdx])
-      + scaledSmallW * (scaledSmallW * ratios[others[0]])
-      + scaledSmallW * (scaledSmallW * ratios[others[1]]);
-
-    const bigX = PAD_SIDE;
-    const bigY = PAD_TOP + Math.floor((usableH - actualBigH) * 0.3);
-    const smallX = PAD_SIDE + scaledBigW + GAP;
-    const s0Y = PAD_TOP + Math.floor((usableH - as0H - as1H - GAP) * 0.3);
-    const s1Y = s0Y + as0H + GAP;
-
-    const positions = [];
-    positions[bigIdx] = { x: bigX, y: bigY, w: scaledBigW };
-    positions[others[0]] = { x: smallX, y: s0Y, w: scaledSmallW };
-    positions[others[1]] = { x: smallX, y: s1Y, w: scaledSmallW };
-
-    layouts.push({ area: totalArea, positions, label: `big-${bigIdx}-left` });
   }
 
-  // --- LAYOUT C: 1 big + 2 stacked (big on right) ---
-  for (const bigIdx of [0, 1, 2]) {
-    const others = [0, 1, 2].filter(i => i !== bigIdx);
-    const bigW = Math.floor(usableW * 0.56 - GAP / 2);
-    const smallW = Math.floor(usableW * 0.44 - GAP / 2);
+  // --- LAYOUT D: 2 on top row + 1 on bottom row ---
+  for (const bottomIdx of [0, 1, 2]) {
+    const topIdxs = [0, 1, 2].filter(i => i !== bottomIdx);
 
-    const bigH = bigW * ratios[bigIdx] + POLAROID_BOTTOM;
-    let scaledBigW = bigW;
-    if (bigH > usableH) {
-      scaledBigW = Math.floor((usableH - POLAROID_BOTTOM) / ratios[bigIdx]);
+    // Top row: 2 photos side by side
+    const topH = usableH * 0.55;
+    let t0W = Math.floor((topH - PB) / ratios[topIdxs[0]]);
+    let t1W = Math.floor((topH - PB) / ratios[topIdxs[1]]);
+    // Clamp so they fit side by side
+    const topTotalW = t0W + GAP + t1W;
+    if (topTotalW > usableW) {
+      const scale = usableW / topTotalW;
+      t0W = Math.floor(t0W * scale);
+      t1W = Math.floor(t1W * scale);
     }
-    const actualBigH = scaledBigW * ratios[bigIdx] + POLAROID_BOTTOM;
 
-    const s0H = smallW * ratios[others[0]] + POLAROID_BOTTOM;
-    const s1H = smallW * ratios[others[1]] + POLAROID_BOTTOM;
-    const stackH = s0H + s1H + GAP;
-    let scaledSmallW = smallW;
-    if (stackH > usableH) {
-      const scale = usableH / stackH;
-      scaledSmallW = Math.floor(smallW * scale);
-    }
-    const as0H = scaledSmallW * ratios[others[0]] + POLAROID_BOTTOM;
-    const as1H = scaledSmallW * ratios[others[1]] + POLAROID_BOTTOM;
+    // Bottom row: 1 photo centered
+    const botAvailH = usableH - topH - GAP;
+    let bW = Math.floor((botAvailH - PB) / ratios[bottomIdx]);
+    bW = Math.min(bW, usableW * 0.65);
 
-    const totalArea = scaledBigW * (scaledBigW * ratios[bigIdx])
-      + scaledSmallW * (scaledSmallW * ratios[others[0]])
-      + scaledSmallW * (scaledSmallW * ratios[others[1]]);
-
-    const smallX = PAD_SIDE;
-    const bigX = PAD_SIDE + scaledSmallW + GAP;
-    const bigY = PAD_TOP + Math.floor((usableH - actualBigH) * 0.3);
-    const s0Y = PAD_TOP + Math.floor((usableH - as0H - as1H - GAP) * 0.3);
-    const s1Y = s0Y + as0H + GAP;
+    const t0X = PAD_SIDE;
+    const t1X = PAD_SIDE + t0W + GAP;
+    const bX = PAD_SIDE + Math.floor((usableW - bW) / 2);
 
     const positions = [];
-    positions[bigIdx] = { x: bigX, y: bigY, w: scaledBigW };
-    positions[others[0]] = { x: smallX, y: s0Y, w: scaledSmallW };
-    positions[others[1]] = { x: smallX, y: s1Y, w: scaledSmallW };
-
-    layouts.push({ area: totalArea, positions, label: `big-${bigIdx}-right` });
+    positions[topIdxs[0]] = { x: t0X, y: PAD_TOP, w: t0W };
+    positions[topIdxs[1]] = { x: t1X, y: PAD_TOP, w: t1W };
+    positions[bottomIdx] = { x: bX, y: PAD_TOP + Math.floor(topH) + GAP, w: bW };
+    tryLayout(positions);
   }
 
-  // Pick layout with maximum total area
+  // --- LAYOUT E: 1 on top + 2 on bottom row ---
+  for (const topIdx of [0, 1, 2]) {
+    const botIdxs = [0, 1, 2].filter(i => i !== topIdx);
+
+    const topH = usableH * 0.55;
+    let tW = Math.floor((topH - PB) / ratios[topIdx]);
+    tW = Math.min(tW, usableW * 0.7);
+
+    const botAvailH = usableH - topH - GAP;
+    let b0W = Math.floor((botAvailH - PB) / ratios[botIdxs[0]]);
+    let b1W = Math.floor((botAvailH - PB) / ratios[botIdxs[1]]);
+    const botTotalW = b0W + GAP + b1W;
+    if (botTotalW > usableW) {
+      const scale = usableW / botTotalW;
+      b0W = Math.floor(b0W * scale);
+      b1W = Math.floor(b1W * scale);
+    }
+
+    const tX = PAD_SIDE + Math.floor((usableW - tW) / 2);
+    const b0X = PAD_SIDE;
+    const b1X = PAD_SIDE + b0W + GAP;
+
+    const positions = [];
+    positions[topIdx] = { x: tX, y: PAD_TOP, w: tW };
+    positions[botIdxs[0]] = { x: b0X, y: PAD_TOP + Math.floor(topH) + GAP, w: b0W };
+    positions[botIdxs[1]] = { x: b1X, y: PAD_TOP + Math.floor(topH) + GAP, w: b1W };
+    tryLayout(positions);
+  }
+
+  if (!layouts.length) return;
+
+  // Pick layout with maximum total photo area
   layouts.sort((a, b) => b.area - a.area);
   const best = layouts[0];
 
@@ -1151,18 +1200,18 @@ function applySmartLayout() {
     const b = document.getElementById('box-' + boxNum);
     const pos = best.positions[i];
     const r = ratios[i];
-    const h = Math.round(pos.w * r + POLAROID_BOTTOM);
+    const h = Math.round(pos.w * r + PB);
 
     // Clamp to screen bounds
     const cx = Math.max(4, Math.min(W - pos.w - 4, pos.x));
-    const cy = Math.max(4, Math.min(H - h - PAD_BOTTOM + 20, pos.y));
+    const cy = Math.max(4, Math.min(H - h - 10, pos.y));
 
     b.style.width = pos.w + 'px';
     b.style.height = h + 'px';
     b.style.left = cx + 'px';
     b.style.top = cy + 'px';
 
-    // Subtle organic rotation (-2 to 2 deg)
+    // Subtle organic rotation
     const rot = ((i * 1.7 + 0.5) % 4 - 2).toFixed(1);
     b.style.transform = `rotate(${rot}deg)`;
     b.style.zIndex = i + 1;
